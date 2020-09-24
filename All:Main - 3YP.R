@@ -1,7 +1,5 @@
 rm(list=ls())
 
-setwd("~/Documents/Fall_18_Data_Files")
-output <- "~/Documents/Fall_18_Data_Files"
 library(dplyr)
 library(foreign)
 library(descr)
@@ -30,7 +28,7 @@ library(gridExtra)
 library(dplyr)
 library(plyr)
 
-cmps <- read.dta13("CMPS2016-book-ms.dta")
+cmps <- read.dta13("CMPS2016 book ms.dta")
 cmps[cmps<0] <-  NA
 
 #National identity index
@@ -42,14 +40,14 @@ cmps$c110 <- as.numeric(cmps$c110) #excluded
 cmps$natid <-(rev(cmps$c107) + rev(cmps$c108) + cmps$c109 + cmps$c110)/4
 cmps$natid <- cmps$natid
 summary(cmps$natid) #come back to this specification
+hist(cmps$natid)
 
-table(cmps$allrace)
 #IVS
 cmps$allrace <- cmps$ethnic_quota
 cmps$allrace <- fct_drop(cmps$allrace, c("Middle Eastern or Arab", "American Indian/Native American", "Other" ))
 cmps$allrace <- revalue(cmps$allrace, c("Hispanic or Latino" = "Latinx", "Black or African American" = "Black",
                         "White Non Hispanic" = "White", "Asian American" = "Asian"))
-table(cmps$allrace)
+
 cmps$allrace <- cmps$allrace
 cmps$Black <- cmps$s2_3
 cmps$White <- cmps$s2_1
@@ -61,35 +59,33 @@ cmps$income <-as.numeric(cmps$c383)
 cmps$south <- cmps$south
 cmps$citizen <-cmps$citizen
 cmps$religion <- cmps$c129
-cmps$age <- cmps$age
+cmps$age <- cmps$age; summary(cmps$age)
 cmps$age <- cut_number(age,10)
 cmps$ed <- as.numeric(cmps$c381)
 cmps$native <- cmps$s7
-cmps$native <- ifelse(native == "United States", 1, 0)#Note that this does not include Puerto Rico. This is a separate category. Excluded because irrelevant to my theory. 
+cmps$native <- ifelse(cmps$native == "United States", 1, 0)#Note that this does not include Puerto Rico. This is a separate category. Excluded because irrelevant to my theory. 
 cmps$native <- as.numeric(cmps$native)
-cmps$party <- cmps$c25 #3-point measure, secondary measure of intensity below  
-cmps$party <- cmps$party 
-cmps$party <- as.numeric(cmps$party)
+cmps$party <- cmps$c25 
 cmps$party <- recode(cmps$party,"c(3,4)= 0 ;c(1,2)= 1")
-party <- cmps$party 
+cmps$party <- as.numeric(cmps$party)
 cmps$Dem <- as.numeric(cmps$c25=="Democrat")
 cmps$partisan <- cmps$c26
 cmps$partisan <- fct_rev(cmps$partisan)
 cmps$partisan <- as.numeric(cmps$partisan)-1
-cmps$lf <- as.numeric(cmps$c150) -1;lf
+cmps$lf <- as.numeric(cmps$c150) -1
 cmps$dlf <- as.numeric(fct_rev(cmps$c151))
 cmps$c.dlf <- fct_rev(cmps$c151)
 cmps$female <- cmps$s3
-cmps$female <- ifelse(female == "Male", 0, 1)
-cmps$female <- as.numeric(female)
-table(c.dlf)
+cmps$female <- ifelse(cmps$female == "Male", 0, 1)
+cmps$female <- as.numeric(cmps$female)
+
 #######################################################################################
 #Descriptive Statistics for National ID
 #######################################################################################
 
 #National identity index
-belong <- cmps$gg.c107 <- as_factor(cmps$c107)  #belong
-respect <-  cmps$gg.c108 <- as_factor(cmps$c108)  #respect and value
+cmps$belong <- cmps$gg.c107 <- as_factor(cmps$c107)  #belong
+cmps$respect <-  cmps$gg.c108 <- as_factor(cmps$c108)  #respect and value
 cmps$out <- cmps$gg.c109 <- as_factor(cmps$c109)  #how much do you feel like an outsider in the US
 cmps$exc <- cmps$gg.c110 <- as_factor(cmps$c110)  #excluded
 cmps$ggnatid <- cmps$natid
@@ -97,8 +93,7 @@ crosstab(cmps$allrace, cmps$gg.c107, prop.r = TRUE)
 crosstab(cmps$allrace, cmps$gg.c108, prop.r = TRUE)
 crosstab(cmps$allrace, cmps$gg.c109, prop.r = TRUE)
 crosstab(cmps$allrace, cmps$gg.c110, prop.r = TRUE)
-100-5.4
-
+76+17
 
 
 b <- ggplot(cmps, aes(allrace, fill = gg.c107))

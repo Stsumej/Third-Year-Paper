@@ -65,6 +65,9 @@ stargazer(bmps[c("natid", "citizen", "female", "native", "south",
 #Modeling
 #######################################################################################
 
+black <-glm(natid ~ citizen + female + native + south + income + partisan + ed + age, 
+             family="gaussian", data=bmps); screenreg(black)
+
 sblack <-glm(natid ~ citizen + female + native + south + income + lf + partisan + ed + age, 
              family="gaussian", data=bmps); screenreg(sblack)
 
@@ -87,7 +90,7 @@ plotreg(sdblack, use.se = FALSE, omit.coef = "Intercept", custom.coef.names = sd
 ascoefnames <- c("Citizen", "Female", "Native Born","South", 
                  "Income", "Linked Fate", "Moderate LF","High LF","Partisanship", "Education", "Age", "Intercept")
 
-stargazer(sblack,sdblack, title = c("Black Collectivism and National Identity"),
+stargazer(black,sblack,sdblack, title = c("Black Collectivism and National Identity"),
           covariate.labels = ascoefnames, dep.var.labels = "National Identity",
           se=list(NULL), omit.stat = c("LL", "ser", "f", "adj.rsq"), digits = 2, type = "text", out = "blacksubsets.htm")
 

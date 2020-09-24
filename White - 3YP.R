@@ -44,6 +44,9 @@ wmps$female <- ifelse(wmps$female == "Male", 0, 1)
 ######################################################################################
 #Modeling
 #######################################################################################
+White <-glm(natid ~ citizen + female + native + south + income + partisan + ed + age, 
+             family="gaussian", data=wmps); screenreg(White)
+
 
 sWhite <-glm(natid ~ citizen + female + native + south + income + lf + partisan + ed + age, 
              family="gaussian", data=wmps); screenreg(sWhite)
@@ -67,7 +70,7 @@ plotreg(sdWhite, use.se = FALSE, omit.coef = "Intercept", custom.coef.names = w.
 w.ascoefnames <- c("Citizen", "Female", "Native Born","South", 
                  "Income", "Linked Fate", "Moderate LF","High LF","Partisanship", "Education", "Age", "Intercept")
 
-stargazer(sWhite,sdWhite, title = c("White Collectivism and National Identity"),
+stargazer(White, sWhite,sdWhite, title = c("White Collectivism and National Identity"),
           covariate.labels = w.ascoefnames, dep.var.labels = "National Identity",
           se=list(NULL), omit.stat = c("LL", "ser", "f", "adj.rsq"), digits = 2, type = "text", out = "whitesubsets.htm")
 

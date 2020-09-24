@@ -33,9 +33,16 @@ anes[anes<0 ] <- NA
 
 
 #NATID, need to figure out how to reverse this and 
+<<<<<<< HEAD
 
 anes$nat <- sort(anes$patriot_amident, decreasing = TRUE)
 anes$nat <- as.numeric(anes$nat)
+=======
+anes$ident_amerid <- sort(anes$ident_amerid, decreasing = TRUE)
+anes$patriot_amident <- sort(anes$patriot_amident, decreasing = TRUE)
+anes$nat <- as.numeric(anes$ident_amerid + anes$patriot_amident)/2
+anes$nat <- sort(anes$nat, decreasing = TRUE)
+>>>>>>> baf79ac99ea4fc18465728df20be1433e96fb9cb
 
 hist(anes$nat)
 table(anes$nat)
@@ -81,6 +88,7 @@ crosstab(anes$allrace, anes$nat, prop.r = TRUE)
 crosstab(anes$nat, anes$blf, prop.r = TRUE)
 
 
+<<<<<<< HEAD
 b <- ggplot(anes, aes(anes$allrace, fill = anes$patriot_amident))
 b <- b + geom_bar(position = "fill") + theme_classic();b
 b <- b + labs(title = "National Identity Orientation: Belonging",
@@ -90,6 +98,8 @@ b <- b + scale_fill_grey(start = 0.2, end = 0.8, na.value = "red", name = "Inten
 
 
 
+=======
+>>>>>>> baf79ac99ea4fc18465728df20be1433e96fb9cb
 #######################################################################################
 #Subset to Blacks Only
 #######################################################################################

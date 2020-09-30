@@ -44,16 +44,16 @@ wmps$female <- ifelse(wmps$female == "Male", 0, 1)
 ######################################################################################
 #Modeling
 #######################################################################################
-White <-glm(natid ~ citizen + female + native + south + income + partisan + ed + age, 
-             family="gaussian", data=wmps); screenreg(White)
+White <-lm(natid ~ citizen + female + native + south + income + partisan + ed + age, 
+            data=wmps); screenreg(White)
 
 
-sWhite <-glm(natid ~ citizen + female + native + south + income + lf + partisan + ed + age, 
-             family="gaussian", data=wmps); screenreg(sWhite)
+sWhite <-lm(natid ~ citizen + female + native + south + income + lf + partisan + ed + age, 
+            data=wmps); screenreg(sWhite)
 
 
-sdWhite <-glm(natid ~ citizen + female + south + income + c.dlf + partisan + ed + age, 
-              family="gaussian", data=wmps); screenreg(sdWhite) #dropped native because it seemed collinear among Whites
+sdWhite <-lm(natid ~ citizen + female + south + income + c.dlf + partisan + ed + age, 
+              data=wmps); screenreg(sdWhite) #dropped native because it seemed collinear among Whites
 
 w.scoefnames <- c("Intercept", "Citizen", "Female", "Native Born","South", 
                 "Income", "Linked Fate", "Partisanship", "Education", "Age")

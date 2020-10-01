@@ -44,8 +44,14 @@ wmps$female <- ifelse(wmps$female == "Male", 0, 1)
 ######################################################################################
 #Modeling
 #######################################################################################
+<<<<<<< HEAD
 White <-lm(natid ~ citizen + female + native + south + income + partisan + ed + age, 
             data=wmps); screenreg(White)
+=======
+White <-glm(natid ~ citizen + female + native + south + income + partisan + ed + age, 
+             family="gaussian", data=wmps); screenreg(White)
+
+>>>>>>> 17c8f5a1f08389a1541534db358fee5283f4a312
 
 
 sWhite <-lm(natid ~ citizen + female + native + south + income + lf + partisan + ed + age, 

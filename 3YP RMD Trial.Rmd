@@ -1,19 +1,26 @@
 ---
 title: "African or American?: Racial Collectivism, Conditional Nativism, and Black American National Identity"
 author: "Jennifer St Sume"
-output: 
-  pdf_document
+abstract:  "Black Americans have faced discrimination throughout all of American History. Still, Black Americans report similar levels of national identity to other groups. I argue that Black Americans have a unique disposition toward national identity known as conditional nativism. Conditional nativism is the process of employing racial collectivism to form a positive orientation toward national identity. Using a national sample of respondents from the 2016 Collaborative Multi-racial Post-election Survey (n = 10,146), I explore the role of conditional nativism in shaping Black American national identity. I find that while racial collectivism predicts a positive orientation toward national identity, the degree of racial collectivism produces a negative orientation toward national identity. These results underscore the role of racial collectivism and conditional nativism in Black American orientation toward national identity."
+output: pdf_document
+indent: true
+header-includes:
+    - \usepackage{setspace}
+    - \doublespacing
 ---
+
+
 ```{r setup, message=FALSE, warning=FALSE, cache=TRUE, echo=FALSE}
+
 setwd("/Users/jenniferst.sume/Documents/Fall_18_Data_Files/Third Year Paper")
 
-library(dplyr)
+
+library(forcats)
 library(foreign)
 library(descr)
 library(knitr)
 library(stargazer)
 library(ggplot2)
-library(tidyverse) 
 library(sandwich)
 library(lmtest)
 library(readstata13)
@@ -23,17 +30,14 @@ library(MASS)
 library(coefplot)
 library(pscl)
 library(visreg)
-library(interactionTest)
-library(interplot)
-library(productplots)
 library(gridExtra)
-library(car)
 library(visreg)
 library(texreg)
 library(ggplot2)
 library(gridExtra)
 library(dplyr)
 library(plyr)
+
 
 cmps <- read.dta13("CMPS2016 book ms.dta")
 cmps[cmps<0] <-  NA
@@ -45,7 +49,7 @@ cmps$c109 <- as.numeric(cmps$c109) #how much do you feel like an outsider in the
 cmps$c110 <- as.numeric(cmps$c110) #excluded
 
 cmps$natid <-(rev(cmps$c107) + rev(cmps$c108) + cmps$c109 + cmps$c110)/4
-cmps$natid <- cmps$natid#come back to this specification
+cmps$natid <- cmps$natid #come back to this specification
 
 #IVS
 cmps$allrace <- cmps$ethnic_quota
@@ -70,13 +74,9 @@ cmps$ed <- as.numeric(cmps$c381)
 cmps$native <- cmps$s7
 cmps$native <- ifelse(cmps$native == "United States", 1, 0)#Note that this does not include Puerto Rico. This is a separate category. Excluded because irrelevant to my theory. 
 cmps$native <- as.numeric(cmps$native)
-cmps$party <- cmps$c25 
-cmps$party <- recode(cmps$party,"c(3,4)= 0 ;c(1,2)= 1")
-cmps$party <- as.numeric(cmps$party)
 cmps$Dem <- as.numeric(cmps$c25=="Democrat")
 cmps$partisan <- cmps$c26
 cmps$partisan <- fct_rev(cmps$partisan)
-cmps$partisan <- as.numeric(cmps$partisan)-1
 cmps$lf <- as.numeric(cmps$c150) -1
 cmps$dlf <- as.numeric(fct_rev(cmps$c151))
 cmps$c.dlf <- fct_rev(cmps$c151)
@@ -85,17 +85,32 @@ cmps$female <- ifelse(cmps$female == "Male", 0, 1)
 cmps$female <- as.numeric(cmps$female)
 ```
 
+#Introduction
+  For centuries, the United State's limited citizenship and national identity to those White, Anglo-Saxon, protestants privileging their relative access to political and economic activities (Naturalization Act of 1790). Over time, policy cues reinforced non-White individuals' "Otherness" from public life and, ultimately, national identity (Acharya, Blackwell, and Sen 2016; Vargas, Sanchez, and Valdez 2017; Alexander and West 2020). Finally, Reconstruction and Jim Crow laws institutionalized race-based exclusion from Whites in all public domains. These included systematic exclusion from resources, education, gainful employment, and the various remaining norms and protections of civic life (Alexander and West 2020). Together, citizenship, policy, and exclusion cues constitute the racial stratification of the American national identity -- forging distinct national identity experiences for White and non-White Americans. 
+
+  Black Americans have responded to the race-based exclusion by adopting racial collectivism as a critical group norm (Dawson 1994).  Racial collectivism is an individual's belief that what happens to members of one's racial group matters for their individual life (Dawson 1994). I argue that racial collectivism informs Black American orientation toward their American national identity. Figure 2 displays the proportion of each racial group that ascribes to racial collectivism.  The "None" category represents those who viewed what happens to members of their racial group as unimportant to how they view themselves. Black Americans are more likely than any other group to report racial collectivism. Black Americans are also most likely to feel strongly that racial collectivism matters to their lives.  
 
 
-**Abstract: Black Americans have faced discrimination throughout all of American History. Still, Black Americans report similar levels of national identity to other groups. I argue that Black Americans have a unique disposition toward national identity known as conditional nativism. Conditional nativism is the process of employing racial collectivism to form a positive orientation toward national identity. Using a national sample of respondents from the 2016 Collaborative Multi-racial Postelection Survey (n = 10,146), I explore the role of conditional nativism in shaping Black American national identity. I find that while racial collectivism predicts a positive orientation toward national identity, the degree of racial collectivism produces a negative orientation toward national identity. These results underscore the role of racial collectivism and conditional nativism in Black American orientation toward national identity.**
+```{r linkedfate-descriptives, cache= TRUE, message= FALSE, warning= FALSE, echo= FALSE, fig.cap="displays the degree of linked fate across racial groups. Data are from the 2016 Collaborative Multi-racial Post-election Survey (n = 10,146)."}
+cmps$gg.dlf <- cmps$c151
+p <- ggplot(cmps, aes(allrace, fill = gg.dlf)) 
+p <- p + geom_bar(position = "fill") + theme_classic()
+p <- p + labs(title = "Degree of Linked Fate Across Racial Groups", x = "Race", y = "Proportion") + theme(plot.title = element_text(hjust = 0.5), plot.caption = element_text(hjust = 0))
+p <- p + scale_fill_grey(start = 0.2, end = 0.8, na.value = "1", name = "Degree of Linked Fate",labels = c("High", "Moderate", "Low", "None"));p
 
-\clearpage
-The first recorded law of the United States explicitly limited citizenship to members of the White racial groups (Naturalization Act of 1790, cite). For centuries citizenship, and by proxy national identity, was limited to those White, Anglo-Saxon, protestants privileging their relative access to political and economic activities. Policy cues further solidified Black individuals' "Otherness" from public life and, ultimately, national identity (Acharya, Blackwell, and Sen 2016; Vargas, Sanchez, and Valdez 2017; Alexander and West 2020). Finally, Reconstruction, Jim Crow laws further isolated Blacks from Whites in all public domains. These included racial minorities systematic exclusion from resources, education, gainful employment, and the various remaining norms and protections of civic life (Alexander and West 2020). Together, citizenship, policy, and exclusion cues constitute the racial stratification of the American national identity -- forging distinct experiences of national identity for White and non-White Americans. 
-
-Black Americans are the only racial American group to have been explicitly rendered property and later integrated into the American national identity. What is the relationship between racial and national identity for Black Americans? Figure 1 reports orientation toward national identity among four main racial subgroups of American national identity. Among Black Americans, 61% feel strongly that they belong in the United States, 95% felt any sense of Belonging at all. Comparatively, 76% of White Americans feel strongly that they belong to the American national identity while 93% feel. Unsurprisingly, however, Black Americans are most likely to feel strongly like an outsider (7%) excluded from their national identity (7%). In summary, Black Americans as a subgroup feel both positively and negatively toward their national identity. 
+```
 
 
-```{r natid-descriptives, cache= TRUE, message= FALSE, warning= FALSE, echo= FALSE}
+What is the relationship between racial and national identity for Black Americans? Why would Black Americans, historically oppressed by American society, feel any sense of national identity? Figure 2 reports orientation toward national identity among four main racial subgroups of American national identity. Among Black Americans, 61% feel strongly that they belong in the United States, 95% felt any sense of Belonging at all. Comparatively, 76% of White Americans feel strongly that they belong to the American national identity while 93% feel. Unsurprisingly, however, Black Americans are most likely to feel strongly like an outsider (7%) excluded from their national identity (7%). In summary, Black Americans as a subgroup feel both positively and negatively toward their national identity. 
+
+
+What is the relationship between racial and national identity for Black Americans? Figure 2 reports orientation toward national identity among the four main racial subgroups of American national identity. Among Black Americans, 61% feel strongly that they belong in the United States, 95% felt any sense of Belonging at all. Comparatively, 76% of White Americans feel strongly that they belong to the American national identity, while 93% feel. Unsurprisingly, Black Americans are most likely to feel strongly like outsiders (7%) excluded from their national identity (7%). In summary, Black Americans, as a subgroup, feel both positively and negatively toward their national identity. 
+
+Why would Black Americans, historically oppressed by American society, feel any sense of national identity? I suspect that racial collectivism motivates a positive orientation toward their national identity. Racial collectivism predicts racial groups members' political behavior, including increased political participation, more generous support for inter-racial group coalitions, liberal views about policy, high participation rates, and the behavior of political elites (Dawson 1994; Miller et al. 1981; Sanchez 2006a; Sanchez and Vargas 2016). Under certain circumstances, racial collectivism can motivate an individual to prioritize group interests over individual interests (White, Laird, and Allen 2014). Therefore, I expect racial collectivism to inform Black American national identity. 
+
+
+```{r natid-descriptives, cache= TRUE, message= FALSE, warning= FALSE, echo= FALSE, fig.cap="reports national identity orientation by racial groups. Each dependent variable is a constituent item of the national identity index I use in Model 1. The x-axis reports racial groups while the y-axis reports the proportion of each group that shares the attachment (Collaborative Multi-Racial Post-Election Survey, n = 10,146)."}
+
 cmps$belong <- cmps$gg.c107 <- as_factor(cmps$c107)  #belong
 cmps$respect <-  cmps$gg.c108 <- as_factor(cmps$c108)  #respect and value
 cmps$out <- cmps$gg.c109 <- as_factor(cmps$c109)  #how much do you feel like an outsider in the US
@@ -104,116 +119,99 @@ cmps$exc <- cmps$gg.c110 <- as_factor(cmps$c110)
 #National identity index
 b <- ggplot(cmps, aes(allrace, fill = gg.c107))
 b <- b + geom_bar(position = "fill") + theme_classic()
-b <- b + labs(title = "National Identity Orientation: Belonging",
+b <- b + labs(title = "National Identity Orientation:\n Belonging",
               x = "Race", y = "Proportion") + theme(plot.title = element_text(hjust = 0.5))
 b <- b + scale_fill_grey(start = 0.2, end = 0.8, na.value = "red", name = "Intensity", 
                          labels = c("High", "Moderate", "Low", "None"))
  
 r <- ggplot(cmps, aes(allrace, fill = gg.c108))
 r <- r + geom_bar(position = "fill") + theme_classic()
-r <- r + labs(title = "National Identity Orientation: Respect and Value",
+r <- r + labs(title = "National Identity Orientation:\n Respect and Value",
               x = "Race", y = "Proportion") + theme(plot.title = element_text(hjust = 0.5))
 r <- r + scale_fill_grey(start = 0.2, end = 0.8, na.value = "red", name = "Intensity", 
                          labels = c("High", "Moderate", "Low", "None"))
 
 ot <- ggplot(cmps, aes(allrace, fill = gg.c109))
 ot <- ot + geom_bar(position = "fill") + theme_classic()
-ot <- ot + labs(title = "National Identity Orientation: Outsider",
+ot <- ot + labs(title = "National Identity Orientation:\n Outsider",
               x = "Race", y = "Proportion") + theme(plot.title = element_text(hjust = 0.5))
 ot <- ot + scale_fill_grey(start = 0.2, end = 0.8, na.value = "red", name = "Intensity", 
                          labels = c("None", "Low","Moderate","High"))
 
 e <- ggplot(cmps, aes(allrace, fill = gg.c110))
 e <- e + geom_bar(position = "fill") + theme_classic()
-e <- e + labs(title = "National Identity Orientation: Excluded",
+e <- e + labs(title = "National Identity Orientation:\n Excluded",
               x = "Race", y = "Proportion") + theme(plot.title = element_text(hjust = 0.5))
 e <- e + scale_fill_grey(start = 0.2, end = 0.8, na.value = "red", name = "Intensity", 
                          labels = c("None", "Low","Moderate","High"))
-grid.arrange(b,r)
-grid.arrange(ot,e)
-```
-
-
-
-**Figure 1 reports national identity orientation by racial groups. Each dependent variable is a constituent item of the national identity index I use in Model 1. The x-axis reports racial groups while the y-axis reports the proportion of each group that shares the attachment (Collaborative Multi-Racial Post-Election Survey, n = 10,146).**
-
-
-How do we explain Black attachment to national identity? I argue that racial collectivism shapes Black American orientation toward their American national identity. Racial collectivism is an individual's belief that what happens to members of one's racial group matters for their individual life (Dawson 1994). Figure 2 displays levels of racial collectivism across racial groups. The y-axis displays the proportion of each racial group to ascribe to collectivist beliefs. Those who viewed what happens to members of their racial group as unimportant to how they view themselves are represented by the "None" category. Black Americans are more likely than anyy other group to report racial collectivism. Furthermore, Black Americans are most likely to feel strongly that racial collectivism matters to their lives. 
-
-```{r linkedfate-descriptives, cache= TRUE, message= FALSE, warning= FALSE, echo= FALSE}
-cmps$gg.dlf <- cmps$c151
-p <- ggplot(cmps, aes(allrace, fill = gg.dlf)) 
-p <- p + geom_bar(position = "fill") + theme_classic()
-p <- p + labs(title = "Degree of Linked Fate Across Racial Groups",
-              x = "Race", y = "Proportion") + theme(plot.title = element_text(hjust = 0.5))
-p <- p + scale_fill_grey(start = 0.2, end = 0.8, na.value = "1", name = "Degree of Linked Fate", 
-                         labels = c("High", "Moderate", "Low", "None"));p
+grid.arrange(b,r, ot, e)
 
 ```
 
-There are two possible effect of the role of racial collectivism on Black American national identity. On one hand, Black Americans are likely to evaluate how Blacks as a whole have been discriminated against when evaluating their attachment to national identity. Thus, they may position themselves in opposition to White Supremacy (Carter and Pérez 2016). In this scenario, Black Americans will feel negatively toward their national identity. On the other hand, Black Americans may cope with this negative feeling by choosing an alternative referent group through which  Black Americans who report racial collectivism will have a positive orientation toward national identity.
 
-I argue that Black American engage in the latter, using their racial identity to compensate for their exclusion from the American national identity. I refer to this process as conditional nativism. I define conditional nativism as the idea that individual attachment to national identity is conditional on their racial group well-being. Conditional nativism is both politically consequential and theoretically imperative to the study of American politics. For example, we know that those with stronger attachments to national identity are more likely to respond to national identity cues for political participation  (Dalton 2008; Klandermans 2014; Rosenstone and Hansen 1993; Valenzuela and Michelson 2016a). 
 
-The story of this paper is as follows. I begin by describing race as the United States' fundamental cleavage that forged a White-Black dichotomy of American national identity. I then review social identity theory highlighting how individuals manage cross-pressures between conflicting identities. I propose that conditional nativism is a mechanism to alleviate the pressures of competing identity concerns. I use survey data from the 2016 Collaborative Multi-Ethnic Post Election Survey to model Black attachment to national identity. I find that Black Americans who report racial collectivism are more likely to hold negative views toward their national identity than non-Black. Together, this paper suggests a theory for understanding the relationship between racial (subgroup) and national (superordinate group) identities for low status groups.   
+
+The story of this paper is as follows. I begin by describing race as the United States' fundamental cleavage that forged a White-Black dichotomy of American national identity. I then review social identity theory highlighting how individuals manage cross-pressures between conflicting identities. I propose that conditional nativism is a mechanism to alleviate the pressures of competing identity concerns. I use survey data from the 2016 Collaborative Multi-Ethnic Post Election Survey to model Black attachment to national identity. I find that Black Americans who report racial collectivism are more likely to hold negative views toward their national identity than non-Black. Together, this paper suggests a theory for understanding the relationship between racial (subgroup) and national (super-ordinate group) identities for low status 
+
+The story of this paper is as follows. I begin by reviewing social identity theory. Mainly, I highlight how individuals cope with feelings of exclusion from an identity. I propose that racial collectivism as a mechanism to cope with the feelings of race-based exclusion from the American national identity. I use survey data from the 2016 Collaborative Multi-Ethnic Post Election Survey to model Black attachment to national identity. I find that Black Americans who report racial collectivism hold positive views toward their national identity. However, those with the strongest racial collectivism levels are more likely to be negative toward their national identity. These findings suggest a need for more comprehensive theories of race and national identity. 
 
 #Discrimination, Exclusion, and Identity Management
 
-Social identity theory argues that individuals self-categorize into identity groups (Tajfel et al. 1971; Tajfel and Turner 1979). Individuals who are members of a group learn the nature, norms, and values of the group and assume these as their own. Additionally, members of a group pay special attention to the status of a group. When a group is threatened, the members react emotionally. While identities may serve as political tools, identities are not inherently political. Their identity becomes politicized when identification with a group combines with a desire to advance group goals through collective action (Miller et al. 1981). In sum, group identities are tools that communicate norms, values, and beliefs to group members and non-members alike. Individuals identify strongly with their group are motivated to act in their group's political interests. 
-
-Groups carry member prototypes or expectations of the nature of a group member. In the case of the United States, the national identity is associated with being White (Devos and Banaji 2005). Why is this so? Centuries of White domination of political spaces have forged a race-based definition of the American national identity. As a result, Black Americans have and continue to be systematically excluded from the American body politic (Shklar 1991). Race-based exclusion has made it difficult for Black Americans to attach themselves to the American national identity. Racial assimilation is impossible because of the immutability of Black skin (Chandra and Wilkinson 2008). While one can move to another country, one cannot move to another racial category. Black Americans are left to negotiate their position through political processes, including, but not limited to, such actions like voting, mobilizing group interests, and forming winning political coalitions within the public. 
-
-Another consequence of race-based exclusion from the American national identity is the feeling of exclusion itself. Exclusion creates negative psychological stress because it violates the individual's need for belongingness (Baumeister and Leary 1995; Tajfel and Turner 1979). Exclusion feels a lot like rejection, and rejection is a painful experience (Tajfel and Turner 1979; Turner, Brown, and Tajfel 1979). When the status of an individual's identity becomes threatened by exclusion, such as Black Americans, an individual is motivated to relieve any negative psychological stress associated therein (Brewer 1999). 
-
-Within a large superordinate identity, such as the United States’ American identity, there are a variety of subgroups. Subgroups are commonly arranged in a hierarchy (Turner and Brown 1978 cite). Social identity theory states that group hierarchies and resource competition contribute to intergroup conflict (Tajfel and turner cite, Brewer cite). The same should apply to intragroup conflict, or the competition of subgroups within a larger superordinate identity. In the United States’ hierarchy, Blacks are a relative low status group. Thus, the landscape of my puzzle is two-dimensional. The first dimension is exclusion from the superordinate identity (intragroup). Second, the relative position of the racial subgroup within the superordinate national identity (Carter and Pérez 2016). 
-
-I define national identity as the individual feeling of being part of a nation. Rupert Emerson defined national identity as “a body of people who feel that they are a nation (Emerson 1960, p. 102).  I operationalize national identity through the framework of social identity theory. In this way, national identity is a group with which an individual might self-categorize and form affect. Social identity theory "provides guidance on the measurement of national attachments, produces a nonideological measure that evades contention over the meaning of American patriotism, and generates testable and empirically substantiated predictions" of individual behavior (Huddy and Khatib 2007, p. 74). 
-
-Importantly, national identity is different than symbolic, constructive, uncritical patriotism, nationalism (Huddy and Khatib 2007); and citizenship (Dalton 2008); is akin but distinct from nationalism (Huddy and Khatib 2007) and least like patriotism (Huddy and Khatib 2007; McDaniel, Nooruddin, and Shortle 2016). There are three major values associated with the American national identity. First, Americans believe that Americans speak English and believe in God. Next, perception of American identity influences perception of minorities and society's well-being. Finally, that Americanism is a symbolic predisposition to national identity. This includes racial and religious expectations of a citizen as described through civic "duty” (Citrin, Reingold, and Green 1990). As a measure, national identity outperforms all other measures in ability to predict civic engagement (Huddy and Khatib me 2007). National identity has equal endorsement from conservatives and liberals alike and improves among immigrant groups over time. Finally, national identity evades racial differences in opinion.
-
-Do individuals care about their racial or national identities more? Political science remains uncertain of the answer. Triandafyllidou (2010) argues that national identity is the most important for all persons in a nation. However, non-White orientation toward national identity is driven by racial collectivism (Citrin, Wong, and Duff 2001). Interestingly, White Americans are the only group for which prioritizing race over national identity only influences attitudes. Only Whites said they view themselves as just American (78%). Black Americans were most likely (27%) to say they view themselves as Black exclusively.  Moreover, Huddy and Khatib (2007) find Blacks have a negative orientation toward national identity. Thus the question of the relationship between racial and national identity is left unanswered. 
-
-So far, the literature has identified that national identity cues operate differently for racial groups. However, little research considers the mechanism that motivate national identity to vary by race. In other words, how do non-White Americans form their orientation toward national identity? I argue persistent racial discrimination has left non-White Americans feeling excluded from the national identity. As a result, non-White groups have chosen alternative mechanisms to understand their own national identity. The mechanism through which non-White Americans infer their national identity is what I refer to as racial collectivism. I explain the role of racial collectivism below. 
-
-#Racial Collectivism, Conditional Nativism, and Black American National Identity
-In Behind the Mule, Michael Dawson (1994) introduces the concept of linked fate. Linked fate is the measurement of how much the outcomes of a group, in this case, Blacks, are included in individual political behavior. Linked fate is a utility heuristic that helps determine the extent to which individual actions (inaction) can produce group-level benefits (costs). The theory of linked fate has been extended to use for other racial and demographic identifiers, but not always appropriately so. One common concept that is used interchangeably with linked fate is group consciousness. Group consciousness is the belief that what happens to others in one’s group will affect themselves personally. Racial group consciousness is the belief that political action is the best means to improve political conditions. Much of Black political behavior is in favor of group interests. 
-
-In total, there are three dimensions of group consciousness: group identity, recognition of the disadvantaged status, and desire for collective action (Garcia 2003; Miller et. al. 1981). Are the concepts of linked fate and group consciousness interchangeable? Evidence suggests that this is only true for Black Americans ((Stephens-Dougan 2016)Sanchez and Vargas 2016). For non-Blacks, linked fate operates on a different theoretical and empirical dimension than group consciousness. Sanchez and Vargas (2016) conduct factor analysis on the linked fate measure. They find only Blacks returned a one-factor solution for the group consciousness and linked fate. For non-Blacks, group consciousness and linked fate are distinct. 
-
-Why are they different? A history of shared discrimination drives linked fate for Blacks and Asians. In contrast, language preference and nativity drive Latino linked fate. In short, linked fate is different for Blacks because they are the only racial group to be enslaved and later integrated into the American electorate. This distinction is important for understanding Black and non-Black political behavior, particularly when employing measures of linked fate and group consciousness. 
-
-In summary, linked fate, or racial collectivism, is a utility heuristic for Black American political behavior. Because Blacks are afraid of behaving in a way that might present costs to the rest of their group, individuals are constrained by following their self-interest. Together, social conformity and internalized beliefs about group solidarity depress self-interested behavior for Black Americans (White, Laird, and Allen 2014). Research has also shown that all Americans use an identity-based approach to forming their partisan identity (Kuo, Malhotra, and Mo 2017; Margolis 2017; Mason and Wronski 2018). In sum, racial collectivism powerfully shapes Black American political behavior.  
+Social identity theory (SIT) argues that individuals self-categorize into identity groups to satisfy a psychological desire for belonging (Tajfel et al. 1971; Tajfel and Turner 1979). SIT also suggests that groups carry general archetypes generally expressed through a group's culture, norms, and values and assume these as their own (Tajfel and Turner 1979). Additionally, group members pay special attention to the status of a group (Tajfel and Turner 1979; Brewer 1999). When an individual perceives a group threat, it causes group members to react emotionally (Brewer 1999). While identities may serve as political tools, identities are not inherently political. Their identity becomes politicized when identification with a group combines with a desire to advance group goals through collective action (Miller et al. 1981). In sum, group identities are tools that communicate norms, values, and beliefs to group members and non-members alike. 
 
 
-In response to racial segregation, Black Americans have adopted racial collectivism as a critical subgroup norm (Dawson 1994).  As a subgroup norm, racial collectivism contradicts the American group norms of individualism. Importantly, the American national identity is rooted in the norms of neoliberalism, Protestantism, individualism, and self-sufficiency (Citrin, Wong, and Duff 2001). Neoliberal norms of individualism and free enterprise (agency) permeate the American body politic in stark contrast to Black American communal norms. Thus, two powerful forces challenge Black American national identity - White supremacy and linked fate. 
-
-Why is racial collectivism a unique and powerful force for Black political behavior? Black individuals withhold from pursuing self-interest over group interests because of the perceived cost to other Blacks (White, Laird, and Allen 2014). Thus, Black collectivism encourages individual conformity. Furthermore, a sense of linked fate predicts racial groups members' political behavior, including increased political participation, greater support for inter-racial group coalitions, liberal views about policy, high participation rates, and the behavior of political elites (Dawson 1994; Miller et al. 1981; Sanchez 2006a; Sanchez and Vargas 2016).
+Social identity theory speculates that group hierarchies and resource competition contribute to inter-group conflict for status and resources (Turner, Brown, and Tajfel 1979) resulting in a intragroup hierarchy. Intragroup status is determined by one's proximity to a group's prototype. There are various subgroups within a sizeable super-ordinate identity, such as the United States' American identity. Subgroups can vary from racial, gender, or partisan groups. All fit within the umbrella identity of the American superordinate identity. 
 
 
-**H1: Those who report collectivist attitudes will have a positive orientation toward national identity.**
+Within the United States' racial hierarchy, Blacks are a relatively low-status group as they differ greatly from the White American prototype. Race-based exclusion from the American national identity causes a feeling of exclusion from the prototype. Exclusion creates negative psychological stress because it violates the individual's need for belonging (Baumeister and Leary 1995; Tajfel and Turner 1979). Exclusion feels like rejection, and rejection is a painful experience that individuals are motivated to resolve (Tajfel and Turner 1979; Turner, Brown, and Tajfel 1979). When the status of an individual's identity becomes threatened by exclusion, such as Black Americans within the American national identity, an individual is motivated to relieve any negative psychological stress associated therein (Brewer 1999). While we know that Black's relative low-status as a group influences their public opinion on national identity (Carter and Pérez 2016) no work has been done to examine the role of the relative status on attachment to national identity. Thus, I present a novel approach to national identity by studying a low-status group. 
 
-Moreover, I expect those who report the highest levels of linked fate to report different levels of racial collectivism than those who feel the lowest levels of linked fate. We know that an individual’s attachment to an identity is distinct from membership in a identity group with consequences for political behavior (Green, Palmquist, and Shickler 2002; Huddy, Mason, and Aarøe 2015a; Suhay 2014). Since I am unsure of the nature of conditional nativism as a mechanism, I remain agnostic to the potential role of collectivist intensity. 
 
-**H2: Strong racial collectivist will report different national identity than low racial collectivist.**
+##Racial Collectivism 
 
-The process of evaluating one’s national identity is my central puzzle. I define conditional nativism as the identity-based process of orienting toward the American national identity. Racial collectivism is the mechanism that motivates Black Americans to evaluate their behavior in the context of group outcomes. In this way, racial collectivism is a utility heuristic that helps determine how individual actions (or inaction) can produce group-level benefits (or costs). 
+Black Americans have coped with feelings of exclusion from their identity with strong racially collectivist beliefs. In Behind the Mule, Michael Dawson (1994) introduces the concept of linked fate. Linked fate is the utility heuristic that helps determine the extent to which individual actions (inaction) can produce group-level benefits (costs). The theory of linked fate has been extended to other racial and demographic identifiers, but not always appropriately. Much of Black political behavior is in favor of group interests. 
 
-Finally, my theory suggests that racial collectivism is a coping mechanism for low-status group within the American national identity. As a result, I expect racial collectivism to have no effet for White Americans as the dominant racial group of the American national identity. If true, collectivism should not be statitstically significant for White Americans. 
+Is linked fate the same for all groups? Evidence suggests that this is only true for Black Americans (Stephens-Dougan 2016; Sanchez and Vargas 2016). For non-Blacks, linked fate operates on a different theoretical and empirical dimension than group consciousness. (Sanchez and Vargas 2016). Why are they different? A history of shared discrimination drives linked fate for Blacks and Asians (Sanchez and Vargas 2016). In contrast, language preference and nativity drive Latino linked fate (Sanchez and Vargas 2016). In short, linked fate is different for Blacks because the nature of their discrimination.
+
+In summary, linked fate, or racial collectivism, is a utility heuristic for Black American political behavior. Because Blacks are afraid of behaving in a way that might present costs to the rest of their group, individuals are constrained by following their self-interest. For these reasons I expect racial collectivism to inform national identity. My theory describes the process through which racial collectivism informs Black American national identity and is described below. Throughout this paper, I use the terms linked fate, racial collectivism, and collectivism interchangeably. Each term expresses the idea that what matters for the racial group matters the individual.
+
+##National Identity
+I define national identity as the personal feeling of being part of a nation. Rupert Emerson defined national identity as "a body of people who feel that they are a nation (Emerson 1960, p. 102).  I operationalize national identity through the framework of social identity theory. In this way, a national identity is a group with which an individual might self-categorize and form affect. Social identity theory "provides guidance on the measurement of national attachments, produces a non-ideological measure that evades contention over the meaning of American patriotism, and generates testable and empirically substantiated predictions" of individual behavior (Huddy and Khatib 2007, p. 74). 
+
+National identity is associated with being White in the United States (Devos and Banaji 2005). Why is this so? Centuries of White domination of political spaces have forged a race-based definition of the American national identity. The result is the race-based exclusion of Black Americans from the American body politic (Shklar 1991). Race-based exclusion has made it difficult for Black Americans to attach themselves to the American national identity. Racial assimilation is impossible because of the immutability of Black skin (Chandra and Wilkinson 2008). While one can move to another country, one cannot move to another racial category. Black Americans are left to negotiate their position through political processes, including, but not limited to, such actions like voting, mobilizing group interests, and forming winning political coalitions within the public. 
+
+Importantly, national identity is different from symbolic, constructive, uncritical patriotism, nationalism (Huddy and Khatib 2007); and citizenship (Dalton 2008); is akin but distinct from nationalism (Huddy and Khatib 2007) and least like patriotism (Huddy and Khatib 2007; McDaniel, Nooruddin, and Shortle 2016). There are three significant values associated with the American national identity. First, Americans believe that Americans speak English and believe in God. Next, the perception of American identity influences the perception of minorities and society's well-being. Finally, Americans believe national identity is best expressed through civic "duty" (Citrin, Reingold, and Green 1990). 
+
+As a measure, national identity outperforms all other measures in the ability to predict civic engagement (Huddy and Khatib me 2007). National identity has an equal endorsement from conservatives and liberals alike and improves among immigrant groups over time (Huddy and Khatib me 2007). Finally, national identity evades racial differences in opinion (Huddy and Khatib me 2007).
+
+#Racial Collectivism and National Identity: A Theory
+
+Do individuals care about their racial or national identities more? Political science remains uncertain of the answer. Triandafyllidou (2010) argues that national identity is the most important for all persons in a nation. However, racial collectivism drives non-White attachment to national identity (Citrin, Wong, and Duff 2001). Interestingly, Whites (78%) were the only group to view themselves as exclusively American. Black Americans were most likely (27%) to say they view themselves as Black exclusively.  Moreover, Huddy and Khatib (2007) find that Blacks have a negative orientation toward national identity.  Thus the question of the relationship between racial and national identity is left unanswered. 
+
+So far, the literature has identified that national identity cues operate differently for racial groups. We know that those with stronger attachments to national identity are more likely to respond to national identity cues for political participation  (Dalton 2008; Klandermans 2014; Rosenstone and Hansen 1993; Valenzuela and Michelson 2016a). However, little research considers the mechanism that motivates national identity to vary by race. In other words, how do non-White Americans form their orientation toward national identity? I argue that persistent racial discrimination has left non-White Americans feeling excluded from the national identity. As a result, non-White groups have chosen alternative mechanisms to understand their own national identity. The mechanism through which non-White Americans infer their national identity is what I refer to as racial collectivism. I explain the role of racial collectivism below. 
+
+There are two possible effects of the role of racial collectivism on Black American national identity. On the one hand, Black Americans are likely to evaluate how Blacks as a whole have been discriminated against when evaluating their attachment to national identity. Thus, they may position themselves in opposition to White Supremacy (Carter and Pérez 2016). In this scenario, Black Americans will feel negatively toward their national identity. On the other hand, Black Americans may cope with this negative feeling by choosing an alternative referent group through which  Black Americans who report racial collectivism will have a positive orientation toward national identity.
+
+I argue that Black Americans engage in the latter, using their racial identity to compensate for their American national identity exclusion. Why? Because according to social identity theory, individuals are motivated to feel optimistic about their identities (Tajfel et al. 1971; Tajfel and Turner 1979). I theorize that racial collectivism is a cognitive mechanism that enables Black Americans to turn their negative attachments into positive ones. This construct is both politically consequential and theoretically imperative to the study of American politics. 
+
+
+**H1: Racial collectivists will have a positive orientation toward national identity.**
+
+Moreover, I expect those who report the highest levels of linked fate to report different racial collectivism levels than those who feel the lowest linked fate levels. We know that an individual's attachment to an identity is distinct from membership in an identity group with consequences for political behavior (Green, Palmquist, and Shickler 2002; Huddy, Mason, and Aarøe 2015a; Suhay 2014). For example, we know that those with stronger attachments to national identity are more likely to respond to national identity cues for political participation  (Dalton 2008; Klandermans 2014; Rosenstone and Hansen 1993; Valenzuela and Michelson 2016a). Since I am unsure of the nature of conditional nativism as a mechanism, I remain agnostic to collectivist intensity's potential role. 
+
+**H2: Strong racial collectivists will report different national identity than low racial collectivists.**
+
+Finally, my theory suggests that racial collectivism is a coping mechanism for low-status groups within the American national identity. As a result, I expect racial collectivism to have no effect on White Americans as the dominant racial group of the American national identity. If true, collectivism should not be statistically significant for White Americans. 
 
 **H3: Racial collectivism will influence low-status and not dominant groups.**
 
 #Methodology
-This paper is based on an analysis of the 2016 Collaborative Multiracial Post-Election Survey (Barreto et al. 2017). The 2016 CMPS includes more than 10,000 respondents, including 1,032 "Whites"; 3,102 "Black/African Americans"; 3,003 Latinx (Latinx/a"/"Hispanic"); and 3,006 "Asian"/" Asian Americans" all self-identified. The survey was conducted via a "random to web" method such that emails were selected randomly from registered voters and commercial vending lists. Individuals associated with those emails were contacted and invited to participate in an online survey. Approximately 40% of the individuals on registered voter lists provided an email address. Invitations and surveys were provided in a bilingual format (English, Spanish, Chinese, Korean, and Vietnamese). The response rate was 9.9%.
+This paper uses data from the 2016 Collaborative Multiracial Post-Election Survey (Barreto et al. 2017). The 2016 CMPS includes more than 10,000 respondents, including 1,032 "Whites"; 3,102 "Black/African Americans"; 3,003 Latinx (Latinx/a "/"Hispanic"); and 3,006 "Asian"/" Asian Americans" all self-identified. The survey was conducted via a "random to web" method such that emails were selected randomly from registered voters and commercial vending lists. Individuals associated with those emails were contacted and invited to participate in an online survey. Approximately 40% of the individuals on registered voter lists provided an email address. Invitations and surveys were provided in a bilingual format (English, Spanish, Chinese, Korean, and Vietnamese). The response rate was 9.9%.
 
-While the CMPS is not a truly representative sample of White Americans, the full data are weighted within each racial group to match the adult population in the 2015 Census ACS 1-year data file for age, gender, education, nativity, ancestry, and voter registration status. A post-stratification raking algorithm was used to balance each category within +/- 1 percent of the ACS estimates. Additionally, the number of Whites in the sample (n=1,032) is sufficient to make meaningful comparisons and inferences from the data. 
+The full data are weighted within each racial group to match the adult population in the 2015 Census ACS 1-year data file for age, gender, education, nativity, ancestry, and voter registration status. The data underwent an algorithmic post-stratification raking to balance each category within +/- 1 percent of the ACS estimates. Additionally, the number of Whites in the sample (n=1,032) is sufficient to make meaningful comparisons and inferences from the data. 
 
-I use an OLS model to measure the role of racial collectivism in predicting a positive or negative orientation toward national identity. My dependent variable is “national identity.” National identity describes a sense of belonging to a nation and the collection of cultural and economic processes that make "imagining" a nation possible (Triandafyllidou 2010). Conceptually, this captures an individual's self-identification as a member of the American identity. Note that I operationalize national identity as separate from citizenship. National identity is an individual's self-identified allegiance to the United States of America and its governing values. I am interested in how individuals perceive their national identity. I forge a national identity index using a variety of national identity items. Together these items capture a respondent’s orientation toward national identity. 
+The CMPS provides a large-sample of Black Americans to understand national identity. While the CMPS is not truly a representative sample, the concentration of non-Whites allows us to study understudied groups' political behavior. Furthermore, few surveys combine the measure of linked fate and national identity. The CMPS provides a unique opportunity to study racial collectivism and national identity. 
 
-My primary measure of interest is “racial collectivism.” To do so, I use the traditional measure of linked fate, "Do you think what happens generally to [racial group] people in this country will have something to do with what happens in your life?" This captures the role of collectivism in orientation toward national identity. This variable takes on the value of "1" if the respondent is collectivist and "0" if the respondent is individualistic. If my theory is correct, I expect linked fate to forge negative views of national identity. I include a second measure of collectivism, degree of linked fate. Among those who report linked fate, respondents are asked to select whether collectivism matters “not very much,” “somewhat,” or “a lot” to their individual outcomes. Intensity of linked fate captures the degree to which individuals feel collectivism matters to their own life. If my theory is correct, the intensity of linked fate will also create a negative perception of national identity. 
-
-Finally, l control for other factors related to identity, including income, age, citizenship, female, education, partisanship, and native-born. I measure income, age, and education as categorical variables. Partisanship is dichotomous where “1” takes on the value of a partisan and “0” indicates a non-partisan. Further, native born takes on “1” if the individual is born here and “0” if they are not. 
-
-```{r black-model-variables, message=FALSE, warning=FALSE, cache=TRUE, echo=FALSE}
+```{r black-descriptives-variables, message=FALSE, warning=FALSE, cache=TRUE, echo=FALSE, results='asis'}
 
 bmps <- cmps[complete.cases(cmps$s2_3 == 1), ]
 bmps <- subset(cmps, cmps$s2_3 == 1)
@@ -246,7 +244,6 @@ bmps$party <- bmps$party
 bmps$Dem <- as.numeric(bmps$c25=="Democrat")
 bmps$partisan <- bmps$c26
 bmps$partisan <- fct_rev(bmps$partisan)
-bmps$partisan <- as.numeric(bmps$partisan)-1
 bmps$lf <- as.numeric(bmps$c150) -1
 bmps$c.dlf <- fct_rev(bmps$c151)
 bmps$female <- bmps$s3
@@ -255,67 +252,95 @@ bmps$female <- as.numeric(bmps$female)
 
 
 #Modeling
-black <-lm(natid ~ citizen + female + native + south + income + partisan + ed + age, 
-             family="gaussian", data=bmps)
+black <-lm(natid ~ citizen + female + native + south + income + partisan + ed + age, data=bmps)
 
-sblack <-lm(natid ~ citizen + female + native + south + income + lf + partisan + ed + age, 
-            data=bmps)
+sblack <-lm(natid ~ citizen + female + native + south + income + lf + partisan + ed + age, data=bmps)
 
-
-sdblack <-lm(natid ~ citizen + female + native + south + income + c.dlf + partisan + ed + age, 
-               data=bmps)
-
-
-```
-
-#Results
-In general, I am interested in how attachment to national identity will vary by race. Specifically, I am interested in Black American attachment to national identity. Further, I am interested in the role of collectivism on orientation toward national identity. I expect two things. First, racial collectivism should shape Black American orientation toward national identity. Model 1 reports the role of collectivism in orientation toward national identity. Descriptive statistics demonstrate that this is a possible explanation. This runs counter to my second hypothesis. Second, that Black Americans with high racial collectivism will behave differently than individuals with low racial collectivism.
-
-```{r black-descriptives, message=FALSE, warning=FALSE, cache=TRUE, echo=FALSE}
-
+sdblack <-lm(natid ~ citizen + female + native + south + income + c.dlf + partisan + ed + age, data=bmps)
 #Descriptive Statistics
 ggbcoefnames <- c("National Identity", "Citizen", "Female", "Native Born", "South",
                  "Income", "Linked Fate", "Partisanship", "Education", "Age")
 
 
 stargazer(bmps[c("natid", "citizen", "female", "native", "south", 
-                 "income", "lf", "partisan", "ed", "age")] ,title = c("Descriptive Statistics"),
-          covariate.labels = ggbcoefnames, digits = 2, type = "text", header=FALSE )
-
-
+                 "income", "lf", "partisan", "ed", "age")] ,title = c("Descriptive Statistics for Black Americans"), covariate.labels = ggbcoefnames, digits = 2, type = "latex", header=FALSE)
 
 ```
 
+I use an OLS model to measure racial collectivism's role in predicting a positive or negative orientation toward national identity. My dependent variable is "national identity." National identity describes a sense of belonging to a nation and the collection of cultural and economic processes that make "imagining" a nation possible (Triandafyllidou 2010). Conceptually, this captures an individual's self-identification as a member of the American identity. 
 
-I begin with the role of racial collectivism in Black American national identity. Model 1 reports the role of collectivism among Black Americans. Racial collectivism makes Black Americans 12% more likely to have a positive orientation. This supports my second hypothesis that racial collectivism creates a positive orientation toward national identity ceteris paribus.  In this view, racial collectivism provides Black Americans with an alternative referent to form their attachment to national identity. Thus, when asking a Black American whether what happens to Black people matters to their national identity, you are also cueing any positive associations with the racial group. In practice, this suggests that Black Americans to build a positive disposition to their national identity by considering their positive affective connection to Blacks as a racial group.  I suspect Black Americans invoke their positive attachment to racial identity 
- 
-```{r black-models, cache= TRUE, message= FALSE, warning= FALSE, echo= FALSE}
-library(stargazer)
+Importantly, I operationalize national identity as separate from citizenship. National identity is an individual's self-identified allegiance to the United States and its governing values. I am interested in how individuals perceive their national identity. I forge a national identity index using a variety of national identity items. The index includes questions addressing a sense of belonging, respect, exclusion, and feelings of being an outsider from the American national identity (see Appendix for more information). National identity is continuous with a minimum of 0 and a maximum of 3. Low values denote a negative orientation toward national identity. Conversely, high values denote a positive attachment toward national identity. 
+
+My primary measure of interest is "racial collectivism." To do so, I use the traditional measure of linked fate, "Do you think what happens generally to [racial group] people in this country will have something to do with what happens in your life?" Linked fate captures the role of collectivism in orientation toward national identity. This variable takes on the value of "1" if the respondent is collectivist and "0" if the respondent is individualistic. If my theory is correct, I expect racial collectivism to forge positive views of national identity. 
+
+Throughout this paper, I use the terms linked fate, racial collectivism, and collectivism interchangeably. Each term expresses the idea that what matters for the racial group matters the individual. 
+
+To test my second hypothesis, I include the second measure of collectivism, the degree of linked fate. Respondents are then asked to select whether collectivism matters "not very much," "somewhat," or "a lot" to their outcomes. The intensity of linked fate captures the degree to which individuals feel racial collectivism matters to their own life. If my theory is correct, the intensity of linked fate will also create a negative perception of national identity. For example, those with strong racial collectivism look different from individuals with weak or moderate racial collectivism. 
+
+Finally, I control other factors related to identity, including income, age, citizenship, female, education, partisanship, and native-born. I measure income, age, and education as categorical variables. Partisanship is the traditional 7 point measure of partisan identity (Green, Palmquist, and Shickler 2002). Further, native-born takes on "1" if the individual is born here and "0" if they are not. These measures account for competing explanations of attachment to national identity. 
+
+I use an OLS model to measure racial collectivism's role in predicting a positive or negative orientation toward national identity. My dependent variable is "national identity." National identity describes a sense of belonging to a nation and the collection of cultural and economic processes that make "imagining" a nation possible (Triandafyllidou 2010). Conceptually, this captures an individual's self-identification as a member of the American identity. 
+
+Importantly, I operationalize national identity as separate from citizenship. National identity is an individual's self-identified allegiance to the United States and its governing values. I am interested in how individuals perceive their national identity. I forge a national identity index using a variety of national identity items. The index includes questions addressing a sense of belonging, respect, exclusion, and feelings of being an outsider from the American national identity (see Appendix for more information). National identity is continuous with a minimum of 0 and a maximum of 3. Low values denote a negative orientation toward national identity. Conversely, high values denote a positive attachment toward national identity. 
+
+My primary measure of interest is "racial collectivism." To do so, I use the traditional measure of linked fate, "Do you think what happens generally to [racial group] people in this country will have something to do with what happens in your life?" Linked fate captures the role of collectivism in orientation toward national identity. This variable takes on the value of "1" if the respondent is collectivist and "0" if the respondent is individualistic. If my theory is correct, I expect racial collectivism to forge positive views of national identity. 
+
+To test my second hypothesis, I include the second measure of collectivism, the degree of linked fate. Respondents are then asked to select whether collectivism matters "not very much," "somewhat," or "a lot" to their outcomes. The intensity of linked fate captures the degree to which individuals feel racial collectivism matters to their own life. If my theory is correct, the intensity of linked fate will also create a negative perception of national identity. For example, those with strong racial collectivism look different from individuals with weak or moderate racial collectivism. 
+
+Finally, I control other factors related to identity, including income, age, citizenship, female, education, partisanship, and native-born. I measure income, age, and education as categorical variables. Partisanship is the traditional 7 point measure of partisan identity (Green, Palmquist, and Shickler 2002). Further, native-born takes on "1" if the individual is born here and "0" if they are not. These measures account for competing explanations of attachment to national identity. 
+
+
+```{r black-model, message=FALSE, warning=FALSE, cache=TRUE, echo=FALSE, results='asis', fig.cap = "displays the results of Model 2. Here I isolate the effect of collectivism on orientation toward national identity among Black Americans. Coefficients are the log-odds of positive orientation to the American national identity. Bars denote 95% confidence intervals. Red bars are statistically significant (alpha = .05). Blue bars are statistically insignificant (alpha = .05)."}
 ascoefnames <- c("Citizen", "Female", "Native Born","South", 
                  "Income", "Linked Fate", "Moderate LF","High LF","Partisanship", "Education", "Age", "Intercept")
 
 stargazer(black,sblack,sdblack, title = c("Black Collectivism and National Identity"),
           covariate.labels = ascoefnames, dep.var.labels = "National Identity",
-          se=list(NULL), omit.stat = c("LL", "ser", "f", "adj.rsq"), digits = 2, type = "text",style = "apsr", header=FALSE)
+          se=list(NULL), omit.stat = c("LL", "ser", "f", "adj.rsq"), digits = 2, type = "latex", header=FALSE, notes = c("Table 1 reports the results of three models measuring the role", "of racial identity and collectivism among Black Americans. Model", "1 captures national identity without racial collectivism. Model 2", "measures the role of the collectivist identity on orientation toward their American national", "identity. Model 3 measures the role of intensity of", "collectivism on perception of national, identity. All", "coefficients are the odds of a positive perception of one’s", "American national identity (alpha = .05)."), notes.align = "l", notes.label = "") 
+
 
 scoefnames <- c("Intercept", "Citizen", "Female", "Native Born","South", 
                 "Income", "Linked Fate", "Partisanship", "Education", "Age")
-sdcoefnames <- c("Intercept", "Citizen", "Female", "Native Born","South", 
-                 "Income", "Moderate LF", "High LF","Partisanship", "Education", "Age")
-
 
 plotreg(sblack, omit.coef = "Intercept", custom.coef.names = scoefnames, custom.model.names = "Black Collectivism and Perception of American National Identity")
 
+```
+
+
+#Results 
+I am interested in the role of collectivism on Black orientation toward national identity. Table 1 reports three separate OLS models. In the first model, I measure Black American attachment to national identity without racial collectivism.  Model 2 includes a measure of linked fate to capture the relationship between racial collectivism and national identity. Finally, Model 3 includes a measure of intensity to capture strong versus weak racial collectivists' disparate impact. National identity is the dependent variable for each of the three models. 
+
+
+My first hypothesis predicts that racial collectivism will create a positive orientation toward national identity. Model 1 reports the role of collectivism among Black Americans. Here, female respondents were more likely to have a positive orientation toward national identity than males. Additionally, older individuals are more likely to have a favorable view of their national identity than younger Black Americans. My second model measures racial collectivism. Racial collectivism makes Black Americans 12% more likely to have a positive orientation toward national identity holding all else equal. This coefficient supports my first hypothesis that racial collectivism creates a positive orientation toward national identity ceteris paribus.  In this view, racial collectivism provides Black Americans with an alternative referent to form their national identity attachment. Thus, when asking a Black American whether Black people matter to their national identity, one also cues any positive associations with the racial group. In practice, this suggests that Black Americans use racial collectivism as a heuristic to form a positive orientation toward their national identity. 
+
+Notably, Black female respondents were more likely to positively view their national identity, even when we controlled for racial collectivism.  Furthermore, partisanship is not a statistically significant factor in predicting Black national identity. Racial collectivism matters for Black Americans across all regional, partisan, and socioeconomic groups and could explain why Black Americans are ideologically and politically homogeneous. 
+ 
+My second hypothesis predicts that those with the highest racial collectivism levels will have a different orientation toward national identity than those with low racial collectivism. Model 2 looks at the role of the degree of collectivism on a positive orientation toward national identity. Statistically, there was no difference between individuals who report moderate collectivism and those who reported low collectivism on positive orientation toward national identity. However, those who reported high collectivism were 23% more likely to have a *negative* view of their national identity across sex, citizenship, nativity, and partisan and socioeconomic identities. Interestingly, the *negative* effect of strong collectivism is twice the size of the *positive* effect of linked fate. 
+
+All in all, the data supports my second hypothesis that strong racial collectivists will behave differently than weak racial collectivists. Surprisingly, the coefficient for intensity differs in both size and magnitude of national identity, procuring a net negative effect for strong collectivist. Perhaps this may be attributed to awareness. Those with the strongest collectivism may be more aware. Those most aware of race-based exclusion's threat might be more likely to feel negatively toward the identity. 
+
+Notably, racial collectivism outperforms partisanship, education, and income in predicting Black American national identity. All three coefficients were small and insignificant. This result suggests that Black Americans are more likely to employ racial collectivism as a heuristic for understanding national identity than other social groupings like their socioeconomic class or partisan identity. This result suggests that race-based exclusion from the national identity could influence Black American national identity either directly or indirectly. 
+
+
+
+```{r black-visuals,  message=FALSE, warning=FALSE, cache=TRUE, echo=FALSE, results= 'asis', fig.cap="displays the results of Model 3. Here I isolate the effect of the intensity of collectivism on orientation toward national identity among Black Americans. Coefficients are the log-odds of positive orientation to the American national identity. Bars denote 95% confidence intervals. Red bars are statistically significant (alpha = .05). Blue bars are statistically insignificant (alpha = .05)."} 
+
+sdcoefnames <- c("Intercept", "Citizen", "Female", "Native Born","South", 
+                 "Income", "Moderate LF", "High LF","Partisanship", "Education", "Age")
 plotreg(sdblack, use.se = FALSE, omit.coef = "Intercept", custom.coef.names = sdcoefnames, 
         custom.model.names = "Degree of Black Collectivism and \n Perception of American National Identity")
 ```
 
-#Comparing to White Racial Collectivism
-I now compare the role of racial collectivism for White Americans. Doing this allows me to isolate the effect of collectivism for White Americans. Table 2 reports three models measuring White American national identity. Model 2 reports the role of racial collectivism in White national identity. The effect of racial collectivism on White national identity is both zero and statistically significant. Unsurprisingly, the level of racial collectivism does not influence White national identity. This supports my theory that conditional nativism is a mechanism for low-status groups. 
 
-Two important lessons arise from my evaluation of White racial collectivism. First, the use of racial collectivism varies across racial groups. This is because the substance of White American racial collectivism is distinct from non-White Americans. Second, the data underscores that White American are relatively individualistic to their non-White counterparts (Sanchez and Vargas 2016). 
+My final hypothesis compares the role of racial collectivism in high-status groups. To do so, I examine the role of racial collectivism for White Americans. Doing this allows me to isolate the effect of collectivism for White Americans. Table 2 reports three models measuring White American national identity. Model 2 reports the role of racial collectivism in White national identity. Unsurprisingly, the effect of racial collectivism on White national identity is both zero and statistically insignificant. 
 
-```{r white-variables-and-descriptives, message=FALSE, warning=FALSE, cache=TRUE, echo=FALSE}
+The same is true for the effect of the degree of collectivism for White Americans. Model 3 measures the effect of the strength of racial collectivism on national identity for White Americans. Neither moderate nor strong collectivists behaved differently than the non-collectivist. This result suggests that the level of racial collectivism does not influence White national identity. As a result, these null findings among White Americans support my theory that conditional nativism is a mechanism for low-status groups to cope with race-based exclusion. 
+
+Compared to Black Americans, partisanship plays a role in orientation toward national identity. 
+
+
+
+```{r white-variables-and-descriptives, message=FALSE, warning=FALSE, cache=TRUE, echo=FALSE, results='asis', fig.cap= "displays the results of modeling the intensity of White American racial collectivism. Here I isolate the effect of the intensity of collectivism on orientation toward national identity among White Americans. Coefficients are the log-odds of positive orientation to the American national identity. Bars denote 95% confidence intervals. Red bars are statistically significant (alpha = .05). Blue bars are statistically insignificant (alpha = .05)."}
 wmps <- cmps[complete.cases(cmps), ]
 wmps <- filter(cmps, cmps$s2_1 == 1)
 
@@ -340,7 +365,6 @@ wmps$party <- wmps$party
 wmps$Dem <- as.numeric(wmps$c25=="Democrat")
 wmps$partisan <- wmps$c26
 wmps$partisan <- fct_rev(wmps$partisan)
-wmps$partisan <- as.numeric(wmps$partisan)-1
 wmps$lf <- as.numeric(wmps$c150) -1
 wmps$c.dlf <- fct_rev(wmps$c151)
 wmps$female <- wmps$s3
@@ -359,52 +383,144 @@ sWhite <-lm(natid ~ citizen + female + native + south + income + lf + partisan +
 sdWhite <-lm(natid ~ citizen + female + south + income + c.dlf + partisan + ed + age, 
               data=wmps) #dropped native because it seemed collinear among Whites
 
-w.scoefnames <- c("Intercept", "Citizen", "Female", "Native Born","South", 
-                "Income", "Linked Fate", "Partisanship", "Education", "Age")
-w.sdcoefnames <- c("Intercept", "Citizen", "Female", "South", 
-                 "Income", "Moderate LF","High LF","Partisanship", "Education", "Age")
-
-
-
-plotreg(sWhite, omit.coef = "Intercept", custom.coef.names = w.scoefnames, custom.model.names = "White Collectivism and \n Perception of American National Identity")
-plotreg(sdWhite, use.se = FALSE, omit.coef = "Intercept", custom.coef.names = w.sdcoefnames, 
-        custom.model.names = "Degree of White Collectivism and \n Perception of American National Identity")
 
 stargazer(bmps[c("natid", "citizen", "female", "native", "south", 
-                 "income", "lf", "partisan", "ed", "age")] ,title = c("Descriptive Statistics"),
-          covariate.labels = ggbcoefnames, digits = 2, type = "text", header=FALSE )
+                 "income", "lf", "partisan", "ed", "age")] ,title = c("Descriptive Statistics for White Americans"),
+          covariate.labels = ggbcoefnames, digits = 2, type = "latex", header=FALSE )
 
-```
-**Figure 6 displays the results of modeling the intensity of White American racial collectivism. Here I isolate the effect of the intensity of collectivism on orientation toward national identity among Black Americans. Coefficients are the log-odds of positive orientation to the American national identity. Bars denote 95% confidence intervals. Red bars are statistically significant (alpha = .05). Blue bars are statistically insignificant (alpha = .05).**
-
-```{r white-models, message=FALSE, warning=FALSE, cache=TRUE, echo=FALSE}
 w.ascoefnames <- c("Citizen", "Female", "Native Born","South", 
                  "Income", "Linked Fate", "Moderate LF","High LF","Partisanship", "Education", "Age", "Intercept")
 
 stargazer(White, sWhite,sdWhite, title = c("White Collectivism and National Identity"),
           covariate.labels = w.ascoefnames, dep.var.labels = "National Identity",
-          se=list(NULL), omit.stat = c("LL", "ser", "f", "adj.rsq"), digits = 2, type = "text", out = "whitesubsets.htm")
+          se=list(NULL), omit.stat = c("LL", "ser", "f", "adj.rsq"), digits = 2, type = "latex", header=FALSE, 
+          notes = c("Table 2 reports the results of three models measuring the role", "of racial identity and collectivism among White Americans. Model", "1 captures national identity without racial collectivism. Model 2", "measures the role of the collectivist identity on orientation toward their American national", "identity. Model 3 measures the role of intensity of", "collectivism on perception of national, identity. All", "coefficients are the odds of a positive perception of one’s", "American national identity (alpha = .05)."), notes.align = "l", notes.label = "")
+
+w.scoefnames <- c("Intercept", "Citizen", "Female", "Native Born","South", 
+                "Income", "Linked Fate", "Partisanship", "Education", "Age")
+plotreg(sWhite, omit.coef = "Intercept", custom.coef.names = w.scoefnames, custom.model.names = "White Collectivism and \n Perception of American National Identity")
 
 ```
+
+
+
+
+```{r white-models, message=FALSE, warning=FALSE, cache=TRUE, echo=FALSE, results= 'asis', fig.cap="displays the results of modeling the intensity of White American racial collectivism. Here I isolate the effect of the intensity of collectivism on orientation toward national identity among Black Americans. Coefficients are the log-odds of positive orientation to the American national identity. Bars denote 95% confidence intervals. Red bars are statistically significant (alpha = .05). Blue bars are statistically insignificant (alpha = .05). "}
+
+w.sdcoefnames <- c("Intercept", "Citizen", "Female", "South", 
+                 "Income", "Moderate LF","High LF","Partisanship", "Education", "Age")
+
+
+
+
+plotreg(sdWhite, use.se = FALSE, omit.coef = "Intercept", custom.coef.names = w.sdcoefnames, 
+        custom.model.names = "Degree of White Collectivism and \n Perception of American National Identity")
+
+
+```
+
 #Discussion
-All in all, my data support my second hypothesis that racial collectivism will create a positive orientation toward national identity. Thus, this provides evidence for my theory that racial collectivism is an alternative referent through which to reframe their orientation toward national identity. There are two reasons why racial collectivism works for low status groups. First, Black collectivism is specifically defined by experiences of discrimination (Sanchez and Vargas 2016) and enacted by improving the social, economic, and political of the subgroup (Dawson 2011). Alternatively, Latino, White, or Asian American collectivism differs so might their respective roles in orientation toward national identity (Sanchez and Vargas 2016). Racial collectivism as an identity allows Black Americans to feel connected to the American identity because Blacks are aware that they share this national identity – with all discrimination and potential therein -- with other Blacks.
+All in all, this analysis provides preliminary support that racial collectivism is an alternative referent to re-frame their orientation toward national identity. The data support my first hypothesis that racial collectivism will create a positive orientation toward national identity. There are two reasons why racial collectivism works for low-status groups. Experiences of discrimination are central to the Black American group identity (Sanchez and Vargas 2016). Second, racial collectivism allows Black Americans to feel connected to the American identity because Blacks are aware that they share this national identity – with all discrimination and potential therein -- with other Blacks.
 
-Furthermore, the data suggests that strong racial collectivists behave differently than weak racial collectivist. An individual’s degree of collectivism articulates the level of attachment to their subgroup. For all Black Americans groups, racial collectivism created a positive orientation toward national identity. However, among Blacks only those with the highest level of collectivism held a negative perception of their national identity. Empirically, this suggests that racial collectivism is conceptually distinct from the intensity of one’s racial collectivism. Theoretically, this suggests that those who feel most attached to their racial group are more likely to be aware of threats and discrimination toward the racial group. 
+Furthermore, the data suggest that strong racial collectivists behave differently than weak racial collectivists. For all Black Americans, racial collectivism created a positive orientation toward national identity. However, only those with the highest collectivism level held a negative perception of Blacks' national identity. Empirically, this suggests that racial collectivism is conceptually distinct from the intensity of one's racial collectivism. Theoretically, this suggests that those who feel most attached to their racial group are more likely to be aware of threats and discrimination toward the racial group. 
 
-All in all, Black American collectivism is who they are, not what they do. Black Americans are more likely to have collectivist beliefs than any other racial group. The salience of racial collectivism provides an alternative referent to understand one’s relative position as an American. Since all Blacks are in the United States, they feel positive toward their national identity because they are aware they are not alone in their collective aim for subgroup well-being. As a result, racial collectivism motivates individuals to form a positive orientation toward national identity. So long as other Black Americans are present in the United States there is sufficient motivation to feel positively toward their national identity. Conditional nativism provides a way for Black Americans to fee positively toward their American identity. In this way, conditional nativism satisfies the psychological need to feel positively toward their national identity as a group member (Tajfel et al. 1971; Tajfel and Turner 1979). 
+The salience of racial collectivism provides an alternative referent to understand one's relative position as an American. Since  Blacks are highly collectivistic, they are aware of group grievances in the United States. However, they feel positive toward their national identity because they know they are not alone in their collective aim for subgroup well-being. As a result, racial collectivism motivates individuals to form a positive orientation toward national identity. So long as other Black Americans are present in the United States, there is sufficient motivation to feel positively toward their national identity. Conditional nativism provides a way for Black Americans to feel positively toward their American identity. In this way, conditional nativism satisfies the psychological need to feel positively toward their national identity as a group member (Tajfel et al. 1971; Tajfel and Turner 1979). 
 
-The distinction between identity membership and identity salience fits in with current theories of social identity. For example, partisan identities, for example, are distinct from intensity measures of partisanship (Green, Palmquist, and Shickler 2002). Partisan identities are group identities and reflect an individual’s attachment to that group. Alternatively, intensity of partisanship measures the degree of attachment to that group. Furthermore, the degree of attachment to a group predicts political behavior. Strong attachment to a group predicts different behavior than weak attachment (Campbell et al. 1960; M. Dawson 1994; Green, Palmquist, and Shickler 2002). One’s relationship between racial and national identity predicts individual attitudes toward minority groups (Citrin, Reingold, and Green 1990); policy attitudes (Citrin, Wong, and Duff (2001); the effectiveness of national identity cues  (Transue 2007; Valenzuela and Michelson 2016); and partisanship. (Kuo, Malhorta, and Hyunjung Mo 2017). Understanding the role of conditional nativism may offer insight into the forces that drive Black American patriotism, partisanship, and participation in American Politics.
+The distinction between identity membership and identity salience fits in with current theories of social identity. For example, partisan identities, for example, are distinct from intensity measures of partisanship (Green, Palmquist, and Shickler 2002). Partisan identities are group identities and reflect an individual's attachment to that group. In this example, racial collectivism is an identity with which Black Americans hold psychological attachments. Alternatively, the intensity of partisanship measures the degree of attachment to that group. This is important because strong attachment to a group predicts different behavior than weak attachment (Campbell et al. 1960; M. Dawson 1994; Green, Palmquist, and Shickler 2002; Huddy, Mason, and Aarøe 2015). One's relationship between racial and national identity predicts individual attitudes toward minority groups (Citrin, Reingold, and Green 1990); policy attitudes (Citrin, Wong, and Duff (2001); the effectiveness of national identity cues  (Transue 2007; Valenzuela and Michelson 2016); and partisanship. (Kuo, Malhorta, and Hyunjung Mo 2017). Understanding the role of conditional nativism may offer insight into the forces that drive Black American patriotism, partisanship, and participation in American Politics.
 
-Understanding Black American national identity is important for understanding Black American pollical participation, political attitudes, and partisanship. For example, the effectiveness of national identity cues differ across racial groups and attachment to national identity (Sanchez 2006b; Transue 2007; Valenzuela and Michelson 2016b). Sanchez (2006b) finds that Latinos who are more Americanized were more likely to respond to American national identity cues than less-Americanized Latinos. Similarly, we might expect Blacks who feel more American to be more responsive to American identity cues than those who feel less American. Still, it could be that the substance and nature of “Black American-hood” is distinct unto itself. 
+Furthermore, the use of racial collectivism to evaluate national identity suggests evidence of a process I call conditional nativism. Conditional nativism is the process of using an alternative referent to evaluate national identity. If conditional nativism is the process, then collectivism, or racial collectivism, is the mechanism through which Black Americans form their national identity. 
 
-Additionally, experiences of discrimination shape partisan attachments for non-White Americans (Kuo, Malhorta, and Hyunjung Mo (2017). One possible explanation for the allegiance of Black Americans to the Democratic party may be rooted in race-based exclusion from the American national identity. If those with high levels of racial collectivism have a negative orientation toward national identity, then these individuals may be more likely to be aware of discrimination and therefore a member of the Democratic party. Thus, both the presence and degree of racial collectivism can be important to understanding Black and non-White political behavior. 
+Understanding Black American national identity is essential for understanding Black American political participation, political attitudes, and partisanship. For example, national identity cues' effectiveness differs across racial groups and attachment to national identity (Sanchez 2006b; Transue 2007; Valenzuela and Michelson 2016b). Sanchez (2006b) finds that Latinos who are more Americanized were more likely to respond to American national identity cues than less-Americanized Latinos. Similarly, we might expect Blacks who feel more American to be more responsive to American identity cues than those who feel less American. Still, it could be that the substance and nature of "Black American-hood" are distinct unto itself. 
 
-#Conclusion
-In response to race-based exclusion from national identity, Black Americans have implemented a conditionally native orientation toward national identity. I combine major themes from social identity and political psychology to observe Black orientation toward the American national identity. Conditional nativism is shaped by Black collectivism and the awareness of their subgroup status. I define racial collectivism as the identity through which individuals orient their national identity. If conditional nativism is the process, then collectivism, or racial collectivism, is the mechanism through which Black Americans form their national identity. 
+Additionally, discrimination experiences shape partisan attachments for non-White Americans (Kuo, Malhorta, and Hyunjung Mo (2017). This underscores research that social identities influence our partisan identities (Margolis 2017; Mason 2018). One possible explanation for the allegiance of Black Americans to the Democratic party may be rooted in race-based exclusion from the American national identity. If those with high racial collectivism levels have a negative orientation toward national identity, these individuals may be more likely to be aware of discrimination and, therefore, a Democratic party member. Thus, both the presence and degree of racial collectivism can be important for understanding Black and non-White political behavior. 
 
-My data suggests that non-White Americans have an alternative referent through which to process their national identity. While this study is insufficient to conclude the role of racial collectivism, it does provide a starting point for understanding Black American national identity in the United States. Specifically, Black Americans are not uniquely “racial” but uniquely collectivistic. Thus, their strong sense of racial collectivism serves as a mechanism for processing information related to the American national identity. 
+In response to race-based exclusion from national identity, Black Americans have implemented a conditionally native orientation toward national identity. I combine major themes from social identity and political psychology to observe Black orientation toward the American national identity.  My theory suggests that racial collectivism is an alternative referent through which low-status individuals orient their national identity. 
 
-While this paper is not meant to survey the entire structure of conditional nativism, there are several lessons to draw from these conclusions. First, when we fail to isolate non-White groups in our measurement, we introduce unnecessary error into our models. Second, racial collectivism is a powerful mechanism for non-White Americans. I demonstrated that racial collectivism improves Black orientation toward national identity. While Black Americans are comforted by the presence of other Blacks to produce a positive national identity, the role of racial collectivism varies by intensity. Those who report highest levels of collectivism are more likely to hold negative views. Together, these results suggest collectivism plays a complex yet central role in Black American attachment to national identity.  Second, this paper underscores the need for accurate measurement of non-White political behavior by comparing Blacks to non-Blacks and not just White Americans. 
+While this study is insufficient to conclude the role of racial collectivism, it does provide a starting point for understanding Black American national identity in the United States. Specifically, Black Americans are not uniquely "racial" but uniquely collectivist. Thus, their strong sense of racial collectivism serves as a mechanism for processing information related to the American national identity. 
 
-Finally, this underscores other research that notes that social identities influence our partisan identities (Margolis 2017; Mason 2018). Further, this work underscores the need to study conditional nativism as a politically relevant mechanism subgroup conflict. Finally, it might be easy to finish this paper because Black Americans feel "unAmerican." However, that would be an incorrect interpretation. Instead, I argue that Black Americans manage their feelings of discriminatory exclusion from the American national identity with a subgroup-based orientation toward their national identity. This process is a response to race-based discrimination. 
+Several lessons emerge from these conclusions. First, when we fail to isolate non-White groups in our measurement, we introduce unnecessary errors into our models. Second, racial collectivism is a powerful mechanism for non-White Americans. I demonstrated that racial collectivism improves Black orientation toward national identity. While Black Americans are comforted by the presence of other Blacks to produce a positive national identity, the role of racial collectivism varies by intensity. Those who report the highest levels of collectivism are more likely to hold negative views. Together, these results suggest that collectivism plays a complex yet central role in Black American attachment to national identity.  Second, this paper underscores the need for accurate measurement of non-White political behavior by comparing Blacks to non-Blacks and not just White Americans. 
+
+Further, this work underscores the need to study conditional nativism as a politically relevant mechanism subgroup conflict. Finally, it might be easy to finish this paper because Black Americans feel "un-American." However, that would be an incorrect interpretation. Instead, I argue that Black Americans manage their feelings of discriminatory exclusion from the American national identity with a subgroup-based orientation toward their national identity. 
+
+#References
+
+Acharya, Avidit, Matthew Blackwell, and Maya Sen. 2016. "The Political Legacy of American Slavery." Journal of Politics 78(3): 621–41.
+
+Alexander, Michelle, and Cornel West. 2020. The New Jim Crow: Mass Incarceration in the Age of Colorblindness The New Jim Crow: Mass Incarceration in the Age of Colorblindness. 10th ed. New York: The New Press. 
+
+Barreto, Matt et al. 2017. "The Collaborative Multiracial Post-Election Survey (CMPS)."
+
+Baumeister, Roy F, and Mark R Leary. 1995. "The Need to Belong: Desire for Interpersonal Attachments as a Fundamental Human Motivation." Psychological Bulletin 117(3): 497–529.
+
+Brewer, Marilynn B. 1999. "The Psychology of Prejudice: Ingroup Love or Outgroup Hate?" Journal of Social Issues 55(3): 429–44.
+
+Campbell, Angus, Philip E Converse, Warren E Miller, and Donald E Stokes. 1960. The American Voter. Chicago and London: University of Chicago Press.
+
+Carter, Niambi M., and Efrén O. Pérez. 2016. "Race and Nation: How Racial Hierarchy Shapes National Attachments." Political Psychology 37(4): 497–513.
+
+Chandra, Kanchan, and Steven Wilkinson. 2008. "Measuring the Effect of 'Ethnicity.'" Comparative Political Studies 41(4/5): 515–63.
+
+Citrin, Jack, Cara Wong, and Brian Duff. 2001. "The Meaning of American National Identity." Social Identity, Intergroup Conflict, and Conflict Reduction 3: 71–100. 
+
+Dalton, Russell J., 2008. "Citizenship Norms and the Expansion of Political Participation." Political Studies 56(1): 76–98.
+
+Dawson, Michael. 1994. Behind the Mule: Race and Class in African-American Politics. Michael C. Dawson. Princeton, N.J.: Princeton University Press. 
+
+Dawson, Michael C., 2011. Not in Our Lifetimes: The Future of Black Politics. Chicago; SE - xvi, 217 pages; 22 cm: University of Chicago Press. 
+
+Devos, Thierry, and Mahzarin R. Banaji. 2005. "American = White ?" Journal of Personality and Social Psychology 88(3): 447–66.
+
+Green, Donald P., Bradley Palmquist, and Erick Shickler. 2002. "Partisan Hearts and Partisan Minds: Political Parties and the Social Identity of Voters." In Partisan Hearts and Partisan Minds: Political Parties and the Social Identity of Voters, Yale University Press, 1–84.
+
+Huddy, Leonie, Lilliana Mason, and Lene Aarøe. 2015a. "Expressive Partisanship: Campaign Involvement, Political Emotion, and Partisan Identity." American Political Science Review 109(1): 1–17.
+
+———. 2015b. "Expressive Partisanship: Campaign Involvement, Political Emotion, and Partisan Identity." American Political Science Review 109(1): 1–17.
+
+Klandermans. 2014. "Identity Politics and Politicized Identities: Identity Processes and the Dynamics of Protest." Political Psychology 35(1): 1–22.
+
+Kuo, Alexander, Neil Malhotra, and Cecilia Hyunjung Mo. 2017. "Social Exclusion and Political Identity: The Case of Asian American Partisanship." Journal of Politics 79(1): 17–32.
+
+Margolis, Michele F., 2017. "How Politics Affects Religion: Partisanship, Socialization, and Religiosity in America." Journal of Politics 80(1): 30–43.
+
+Mason, Lilliana, and Julie Wronski. 2018. "One Tribe to Bind Them All: How Our Social Group Attachments Strengthen Partisanship." 39.
+
+Miller, Arthur H., Patricia Gurin, Gerald Gurin, and Oksana Malanchuk. 1981. "Group Consciousness and Political Participation." American Journal of Political Science.
+
+Pew Research Center., 2017). Black voter turnout fell in 2016, even as a record number of Americans cast ballots. 
+
+Rosenstone, Steven J., and John Mark Hansen. 1993. "Introduction: The Puzzle of Participation in American Politics." In Mobilization, Participation, and Democracy in America.
+
+Sanchez, Gabriel R. 2006a. "The Role of Group Consciousness in Political Participation among Latinos in the United States." American Politics Research 34(4): 427–50.
+
+———. 2006b. "The Role of Group Consciousness in Political Participation Among Latinos in the United States." American Politics Research 34(4): 427–50.
+
+Sanchez, Gabriel R., and Edward D. Vargas. 2016. "Taking a Closer Look at Group Identity: The Link between Theory and Measurement of Group Consciousness and Linked Fate." Political Research Quarterly 69(1): 160–74.
+
+Shinnar, Rachel S., 2008. "Coping with Negative Social Identity: The Case of Mexican Immigrants." Journal of Social Psychology 148(5): 553–76.
+
+Shklar, Judith N., 1991. 7 Harvard University Press American Citizenship: The Quest for Inclusion. Harvard: Harvard University Press, 1991, 136 Pp. Cambridge University Press.
+
+Stephens-Dougan, Lafleur. 2016. "Priming Racial Resentment without Stereotypic Cues." Journal of Politics 78(3): 687–704.
+
+Suhay, Elizabeth. 2014. "Explaining Group Influence : The Role of Identity and Emotion in Political Conformity and Polarization." Political Behavior 37(1): 221–51.
+
+Tajfel, Henri, M.G. Billig, R.P. Bundy, and Claude Flament. 1971. "Social Categorization and Intergroup Behavior." European Journal of Social Psychology 1(2): 149–78.
+
+Tajfel, Henri, and John Turner. 1979. "An Integrative Theory of Intergroup Conflict."
+
+Tesler, Michael. 2015. "The Conditions Ripe for Racial Spillover Effects." Political Psychology 36(S1): 101–17.
+
+Transue, John E., 2007. "Identity Salience, Identity Acceptance, and Racial Policy Attitudes: American National Identity as a Uniting Force." American Journal of Political Science 51(1): 78–91.
+
+Triandafyllidou, Anna. 2010. "2 National Identity and the 'Other.'" In Immigrants & National Identity in Europe.
+
+Turner, J.C., R.J. Brown, and H. Tajfel. 1979. "Social Comparison and Group Interest in Ingroup Favouritism" European Journal of Social Psychology.
+
+Valenzuela, Ali A., and Melissa R. Michelson. 2016a. "Turnout, Status, and Identity: Mobilizing Latinos to Vote with Group Appeals." American Political Science Review 110(4): 615–30.
+
+———. 2016b. "Turnout, Status, and Identity: Mobilizing Latinos to Vote with Group Appeals." American Political Science Review 110(4): 615–30.
+
+Vargas, Edward D., Gabriel R. Sanchez, and Juan A. Valdez. 2017. "Immigration Policies and Group Identity: How Immigrant Laws Affect Linked Fate among U.S. Latino Populations." The Journal of Race, Ethnicity, and Politics 2(01): 35–62.
+
+White, Ismail K, Chryl N Laird, and Troy D Allen. 2014. "Selling Out?: The Politics of Navigating Conflicts between Racial Group Interest and Self- Interest." American Political Science Review 108(4): 783–800.
 

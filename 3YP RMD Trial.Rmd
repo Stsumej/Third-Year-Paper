@@ -37,7 +37,7 @@ library(ggplot2)
 library(gridExtra)
 library(dplyr)
 library(plyr)
-
+citation("stargazer")
 
 cmps <- read.dta13("CMPS2016 book ms.dta")
 cmps[cmps<0] <-  NA
@@ -472,6 +472,10 @@ Devos, Thierry, and Mahzarin R. Banaji. 2005. "American = White ?" Journal of 
 
 Green, Donald P., Bradley Palmquist, and Erick Shickler. 2002. "Partisan Hearts and Partisan Minds: Political Parties and the Social Identity of Voters." In Partisan Hearts and Partisan Minds: Political Parties and the Social Identity of Voters, Yale University Press, 1–84.
 
+Hlavac, Marek (2018). "Stargazer: Well-Formatted
+  Regression and Summary Statistics Tables." R
+  package version 5.2.1.
+  
 Huddy, Leonie, Lilliana Mason, and Lene Aarøe. 2015a. "Expressive Partisanship: Campaign Involvement, Political Emotion, and Partisan Identity." American Political Science Review 109(1): 1–17.
 
 ———. 2015b. "Expressive Partisanship: Campaign Involvement, Political Emotion, and Partisan Identity." American Political Science Review 109(1): 1–17.
@@ -480,6 +484,11 @@ Klandermans. 2014. "Identity Politics and Politicized Identities: Identity Proce
 
 Kuo, Alexander, Neil Malhotra, and Cecilia Hyunjung Mo. 2017. "Social Exclusion and Political Identity: The Case of Asian American Partisanship." Journal of Politics 79(1): 17–32.
 
+Leifeld, Philip (2013). texreg: Conversion of
+  Statistical Model Output in R to LaTeX and HTML
+  Tables. Journal of Statistical Software, 55(8),
+  1-24.
+  
 Margolis, Michele F., 2017. "How Politics Affects Religion: Partisanship, Socialization, and Religiosity in America." Journal of Politics 80(1): 30–43.
 
 Mason, Lilliana, and Julie Wronski. 2018. "One Tribe to Bind Them All: How Our Social Group Attachments Strengthen Partisanship." 39.

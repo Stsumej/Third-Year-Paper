@@ -1,0 +1,376 @@
+Racial Collectivism National Identity
+========================================================
+author: Jennifer St Sume
+date: October 28, 2020
+autosize: true
+```{r setup, message=FALSE, warning=FALSE, cache=TRUE, echo=FALSE}
+
+library(forcats)
+library(foreign)
+library(descr)
+library(knitr)
+library(stargazer)
+library(ggplot2)
+library(sandwich)
+library(lmtest)
+library(readstata13)
+library(data.table)
+library(score)
+library(MASS)
+library(coefplot)
+library(pscl)
+library(visreg)
+library(gridExtra)
+library(visreg)
+library(texreg)
+library(ggplot2)
+library(gridExtra)
+library(dplyr)
+library(plyr)
+library(forcats)
+
+
+cmps <- read.dta13("CMPS2016 book ms.dta")
+
+#National identity index
+cmps$c107 <- as.numeric(cmps$c107) #belong
+cmps$c108 <- as.numeric(cmps$c108) #respect and value
+cmps$c109 <- as.numeric(cmps$c109) #how much do you feel like an outsider in the US
+cmps$c110 <- as.numeric(cmps$c110) #excluded
+
+cmps$natid <-(rev(cmps$c107) + rev(cmps$c108) + cmps$c109 + cmps$c110)/4
+cmps$natid <- cmps$natid 
+
+#IVS
+cmps$allrace <- cmps$ethnic_quota
+cmps$allrace <- fct_drop(cmps$allrace, c("Middle Eastern or Arab", "American Indian/Native American", "Other" ))
+cmps$allrace <- revalue(cmps$allrace, c("Hispanic or Latino" = "Latinx", "Black or African American" = "Black",
+                        "White Non Hispanic" = "White", "Asian American" = "Asian"))
+
+cmps$allrace <- cmps$allrace
+cmps$Black <- cmps$s2_3
+cmps$White <- cmps$s2_1
+cmps$Latino <- cmps$s2_2
+cmps$Asian <- cmps$s2_4
+
+#Controls
+cmps$income <-as.numeric(cmps$c383)
+cmps$south <- cmps$south
+cmps$citizen <-cmps$citizen
+cmps$religion <- cmps$c129
+cmps$age <- cmps$age
+cmps$age <- cut_number(cmps$age,10)
+cmps$ed <- as.numeric(cmps$c381)
+cmps$native <- cmps$s7
+cmps$native <- ifelse(cmps$native == "United States", 1, 0)#Note that this does not include Puerto Rico. This is a separate category. Excluded because irrelevant to my theory. 
+cmps$native <- as.numeric(cmps$native)
+cmps$Dem <- as.numeric(cmps$c25=="Democrat")
+cmps$partisan <- cmps$c26
+cmps$partisan <- fct_rev(cmps$partisan)
+cmps$lf <- as.numeric(cmps$c150) -1
+cmps$dlf <- as.numeric(fct_rev(cmps$c151))
+cmps$c.dlf <- fct_rev(cmps$c151)
+cmps$female <- cmps$s3
+cmps$female <- ifelse(cmps$female == "Male", 0, 1)
+cmps$female <- as.numeric(cmps$female)
+
+
+```
+
+```{r natid-descriptives, cache= TRUE, message= FALSE, warning= FALSE, echo= FALSE, results= "hide"}
+
+cmps$belong <- cmps$gg.c107 <- as_factor(cmps$c107)  #belong
+cmps$respect <-  cmps$gg.c108 <- as_factor(cmps$c108)  #respect and value
+cmps$out <- cmps$gg.c109 <- as_factor(cmps$c109)  #how much do you feel like an outsider in the US
+cmps$exc <- cmps$gg.c110 <- as_factor(cmps$c110)
+
+#National identity index
+b <- ggplot(cmps, aes(allrace, fill = gg.c107))
+b <- b + geom_bar(position = "fill") + theme_classic()
+b <- b + labs(title = "National Identity Orientation:\n Belonging",
+              x = "Race", y = "Proportion") + theme(plot.title = element_text(hjust = 0.5))
+b <- b + scale_fill_grey(start = 0.2, end = 0.8, na.value = "red", name = "Intensity", 
+                         labels = c("High", "Moderate", "Low", "None"))
+ 
+r <- ggplot(cmps, aes(allrace, fill = gg.c108))
+r <- r + geom_bar(position = "fill") + theme_classic()
+r <- r + labs(title = "National Identity Orientation:\n Respect and Value",
+              x = "Race", y = "Proportion") + theme(plot.title = element_text(hjust = 0.5))
+r <- r + scale_fill_grey(start = 0.2, end = 0.8, na.value = "red", name = "Intensity", 
+                         labels = c("High", "Moderate", "Low", "None"))
+
+ot <- ggplot(cmps, aes(allrace, fill = gg.c109))
+ot <- ot + geom_bar(position = "fill") + theme_classic()
+ot <- ot + labs(title = "National Identity Orientation:\n Outsider",
+              x = "Race", y = "Proportion") + theme(plot.title = element_text(hjust = 0.5))
+ot <- ot + scale_fill_grey(start = 0.2, end = 0.8, na.value = "red", name = "Intensity", 
+                         labels = c("None", "Low","Moderate","High"))
+
+e <- ggplot(cmps, aes(allrace, fill = gg.c110))
+e <- e + geom_bar(position = "fill") + theme_classic()
+e <- e + labs(title = "National Identity Orientation:\n Excluded",x = "Race", y = "Proportion") + theme(plot.title = element_text(hjust = 0.5))
+e <- e + scale_fill_grey(start = 0.2, end = 0.8, na.value = "red", name = "Intensity", labels = c("None", "Low","Moderate","High"))
+
+
+```
+Outline
+========================================================
+
+
+- Research Question and Puzzle
+- Theory  
+- Data and Results
+- Conclusion 
+
+Puzzle
+========================================================
+Why do Black Americans feel any positive sentiment toward their national identity? 
+
+```{r, cache = TRUE, echo=FALSE, fig.cap="reports national identity orientation by racial groups. Each dependent variable is a constituent item of the national identity index I use in Model 1. The x-axis reports racial groups while the y-axis reports the proportion of each group that shares the attachment (Collaborative Multi-Racial Post-Election Survey, n = 10,146)."}
+
+grid.arrange(b,r, ot, e)
+
+```
+
+
+Research Question
+========================================================
+Social Identity Theory (Tajfel et al. 1971; Tajfel and Turner 1979)
+
+- individuals self-categorize
+- they do so to feel good 
+
+
+>RQ: What happens when a group member feels negatively toward their identity, such as Black Americans toward their national identity? 
+   
+    > A: Select an alternative referent 
+    > EX: Black is Beautiful, Black Lives Matter, etc.
+    
+
+Theory: Racial Collectivism 
+========================================================
+
+I theorize that individuals use an alternative referent when coping with negative attachments. 
+
+Racial collectivism is a group referent for political choice (Dawson 1994)
+
+- racial collectivism -> political choice 
+- I extend this to non-political choice
+- I pose RC as a strategy to cope with the negative consequences of racial exclusion from national identity
+
+Theory: Racial Collectivism 
+========================================================
+How much does linked fate matter for Blacks?
+
+```{r, cache = TRUE, echo = FALSE, fig.cap="displays the degree of linked fate across racial groups. Data are from the 2016 Collaborative Multi-racial Post-election Survey (n = 10,146)."}
+
+cmps$gg.dlf <- cmps$c151
+p <- ggplot(cmps, aes(allrace, fill = gg.dlf)) 
+p <- p + geom_bar(position = "fill") + theme_classic()
+p <- p + labs(title = "Degree of Linked Fate Across Racial Groups", x = "Race", y = "Proportion") + theme(plot.title = element_text(hjust = 0.5), plot.caption = element_text(hjust = 0))
+p <- p + scale_fill_grey(start = 0.2, end = 0.8, na.value = "1", name = "Degree of Linked Fate",labels = c("High", "Moderate", "Low", "None"))
+
+plot(p)
+```
+
+Hypotheses
+========================================================
+
+>H1: Racial collectivists will have a positive orientation toward national identity. (B > 0)
+
+>H2: Strong racial collectivists will report different national identity than low racial collectivists. (B ≠ 0)
+
+>H3: Racial collectivism will influence low-status and not dominant groups. (B = 0)
+
+Data and Methods
+=======================================================
+Data are from **Collaborative Multiethnic Post-Election Survey 2016 (n=10,146)**
+
+Empirical Strategy:
+
+  1. subset to Black Americans and assess the role of RC
+  2. subset to White Americans and assess the role of RC
+
+
+Results: Black Americans
+=======================================================
+
+```{r black-descriptives-variables, message=FALSE, warning=FALSE, cache=TRUE, echo=FALSE, results='hide'}
+
+bmps <- cmps[complete.cases(cmps$s2_3 == 1), ]
+bmps <- subset(cmps, cmps$s2_3 == 1)
+
+bmps$natid <-(rev(bmps$c107) + rev(bmps$c108) + bmps$c109 + bmps$c110)/4
+bmps$natid <- bmps$natid-1
+#IVS
+bmps$allrace <- bmps$ethnic_quota
+bmps$allrace <- bmps$allrace
+bmps$Black <- bmps$s2_3
+bmps$White <- bmps$s2_1
+bmps$Latino <- bmps$s2_2
+bmps$Asian <- bmps$s2_4
+
+#Controls
+bmps$income <-as.numeric(bmps$c383)
+bmps$south <- bmps$south
+bmps$citizen <-bmps$citizen
+bmps$religion <- bmps$c129
+bmps$age <- as.numeric(bmps$age)
+bmps$ed <- as.numeric(bmps$c381)
+bmps$native <- bmps$s7
+bmps$native <- ifelse(bmps$native == "United States", 1, 0) #Note that this does not include Puerto Rico. This is a separate category. Excluded because irrelevant to my theory. 
+bmps$native <- as.numeric(bmps$native)
+bmps$party <- bmps$c25 #3-point measure, secondary measure of intensity below  
+bmps$party <- bmps$party 
+bmps$party <- as.numeric(bmps$party)
+bmps$party <- recode(bmps$party,"c(3,4)= 0 ;c(1,2)= 1")
+bmps$party <- bmps$party 
+bmps$Dem <- as.numeric(bmps$c25=="Democrat")
+bmps$partisan <- bmps$c26
+bmps$partisan <- fct_rev(bmps$partisan)
+bmps$lf <- as.numeric(bmps$c150) -1
+bmps$c.dlf <- fct_rev(bmps$c151)
+bmps$female <- bmps$s3
+bmps$female <- as.numeric(ifelse(bmps$female == "Male", 0, 1))
+bmps$female <- as.numeric(bmps$female)
+
+
+#Modeling
+black <- lm(natid ~ citizen + female + native + south + income + partisan + ed + age, data=bmps, weights = bmps$weight)
+
+sblack <-lm(natid ~ citizen + female + native + south + income + lf + partisan + ed + age, data=bmps, weights = bmps$weight)
+
+sdblack <-lm(natid ~ citizen + female + native + south + income + c.dlf + partisan + ed + age, data=bmps, weights = bmps$weight)
+
+#Descriptive Statistics
+ggbcoefnames <- c("National Identity", "Citizen", "Female", "Native Born", "South",
+                 "Income", "Linked Fate", "Partisanship", "Education", "Age")
+
+
+stargazer(bmps[c("natid", "citizen", "female", "native", "south", 
+                 "income", "lf", "partisan", "ed", "age")] ,title = c("Descriptive Statistics for Black Americans"), covariate.labels = ggbcoefnames, digits = 2, type = "latex", header=FALSE)
+
+``` 
+
+
+```{r, results = "asis", echo = FALSE, cache = TRUE, fig.cap="displays the results of Model 3. Here I isolate the effect of the intensity of collectivism on orientation toward national identity among Black Americans. Coefficients are the log-odds of positive orientation to the American national identity. Bars denote 95% confidence intervals. Red bars are statistically significant (alpha = .05). Blue bars are statistically insignificant (alpha = .05)."}
+
+scoefnames <- c("Intercept", "Citizen", "Female", "Native Born","South", 
+                "Income", "Linked Fate", "Partisanship", "Education", "Age")
+
+plotreg(sblack, omit.coef = "Intercept", custom.coef.names = scoefnames) + labs(title = "Black Collectivism and American National Identity") + theme_classic()
+
+sdcoefnames <- c("Intercept", "Citizen", "Female", "Native Born","South", 
+                 "Income", "Moderate LF", "High LF","Partisanship", "Education", "Age")
+
+plotreg(sdblack, use.se = FALSE, omit.coef = "Intercept", custom.coef.names = sdcoefnames) + labs(title ="Degree of Black Collectivism and American National Identity") + theme_classic()
+
+
+```
+
+
+Results: White Americans
+========================================================
+
+```{r white-variables-and-descriptives, message=FALSE, warning=FALSE, cache=TRUE, echo=FALSE, results='hide', fig.cap= "displays the results of modeling the intensity of White American racial collectivism. Here I isolate the effect of the intensity of collectivism on orientation toward national identity among White Americans. Coefficients are the log-odds of positive orientation to the American national identity. Bars denote 95% confidence intervals. Red bars are statistically significant (alpha = .05). Blue bars are statistically insignificant (alpha = .05)."}
+wmps <- cmps[complete.cases(cmps), ]
+wmps <- filter(cmps, cmps$s2_1 == 1)
+
+#IVS
+wmps$allrace <- wmps$ethnic_quota
+wmps$allrace <- wmps$allrace
+
+#Controls
+wmps$income <-as.numeric(wmps$c383)
+wmps$south <- wmps$south
+wmps$citizen <-wmps$citizen
+wmps$religion <- wmps$c129
+wmps$age <- as.numeric(wmps$age)
+wmps$ed <- as.numeric(wmps$c381)
+wmps$native <- wmps$s7
+wmps$native <- ifelse(wmps$native == "United States", 1, 0)#Note that this does not include Puerto Rico. This is a separate category. Excluded because irrelevant to my theory. 
+wmps$party <- wmps$c25 #3-point measure, secondary measure of intensity below  
+wmps$party <- wmps$party 
+wmps$party <- as.numeric(wmps$party)
+wmps$party <- recode(wmps$party,"c(3,4)= 0 ;c(1,2)= 1")
+wmps$party <- wmps$party 
+wmps$Dem <- as.numeric(wmps$c25=="Democrat")
+wmps$partisan <- wmps$c26
+wmps$partisan <- fct_rev(wmps$partisan)
+wmps$lf <- as.numeric(wmps$c150) -1
+wmps$c.dlf <- fct_rev(wmps$c151)
+wmps$female <- wmps$s3
+wmps$female <- ifelse(wmps$female == "Male", 0, 1)
+
+#Modeling
+
+White <-lm(natid ~ citizen + female + native + south + income + partisan + ed + age, 
+            data=wmps, weights = wmps$weight)
+
+
+sWhite <-lm(natid ~ citizen + female + native + south + income + lf + partisan + ed + age, 
+            data=wmps, weights = wmps$weight)
+
+ 
+sdWhite <-lm(natid ~ citizen + female + south + income + c.dlf + partisan + ed + age, 
+              data=wmps, weights = wmps$weight) #dropped native because it seemed collinear among Whites
+
+
+stargazer(bmps[c("natid", "citizen", "female", "native", "south", 
+                 "income", "lf", "partisan", "ed", "age")] ,title = c("Descriptive Statistics for White Americans"),
+          covariate.labels = ggbcoefnames, digits = 2, type = "latex", header=FALSE )
+
+w.ascoefnames <- c("Citizen", "Female", "Native Born","South", 
+                 "Income", "Linked Fate", "Moderate LF","High LF","Partisanship", "Education", "Age", "Intercept")
+
+stargazer(White, sWhite,sdWhite, title = c("White Collectivism and National Identity"),
+          covariate.labels = w.ascoefnames, dep.var.labels = "National Identity",
+          se=list(NULL), omit.stat = c("LL", "ser", "f", "adj.rsq"), digits = 2, type = "latex", header=FALSE, 
+          notes = c("Table 2 reports the results of three models measuring the role", "of racial identity and collectivism among White Americans. Model", "1 captures national identity without racial collectivism. Model 2", "measures the role of the collectivist identity on orientation toward their American national", "identity. Model 3 measures the role of intensity of", "collectivism on perception of national, identity. All", "coefficients are the odds of a positive perception of one’s", "American national identity (alpha = .05)."), notes.align = "l", notes.label = "")
+
+```
+
+```{r, r, results = "asis", echo = FALSE, cache = TRUE, message=FALSE, warning=FALSE, fig.cap= "displays the results of modeling the intensity of White American racial collectivism. Here I isolate the effect of the intensity of collectivism on orientation toward national identity among White Americans. Coefficients are the log-odds of positive orientation to the American national identity. Bars denote 95% confidence intervals. Red bars are statistically significant (alpha = .05). Blue bars are statistically insignificant (alpha = .05)."}
+
+
+w.scoefnames <- c("Intercept", "Citizen", "Female", "Native Born","South", 
+                "Income", "Linked Fate", "Partisanship", "Education", "Age")
+
+plotreg(sWhite, omit.coef = "Intercept", custom.coef.names = w.scoefnames) + labs(title ="White Collectivism and American National Identity") + theme_classic()
+
+
+w.sdcoefnames <- c("Intercept", "Citizen", "Female", "South", 
+                 "Income", "Moderate LF","High LF","Partisanship", "Education", "Age")
+
+plotreg(sdWhite, use.se = FALSE, omit.coef = "Intercept", custom.coef.names = w.sdcoefnames) + labs(title = "Degree of White Collectivism and American National Identity") + theme_classic()
+```
+
+Summary of Results
+========================================================
+The data suggests that:
+
+- RC extends to **non-political choices**
+- RC is an alternative **referent** 
+- RC is **strategy** for low-status groups to cope with  negative consequences of racial exclusion
+
+>Strategy/Process: "Conditional Nativism""
+
+Conclusion
+========================================================
+
+-Comments on decscription of theory. 
+
+-Comments on description of Conditional Naivism
+
+-Comments of phrasing/approach to Hypothesis 2 (indifference)
+
+References
+========================================================
+
+Tajfel, Henri, M.G. Billig, R.P. Bundy, and Claude Flament. 1971. "Social Categorization and Intergroup Behavior." European Journal of Social Psychology 1(2): 149–78.
+
+Tajfel, Henri, and John Turner. 1979. "An Integrative Theory of Intergroup Conflict."
+
+
+
+

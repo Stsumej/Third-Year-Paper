@@ -1,0 +1,27 @@
+"0","cces %>% 
+  group_by(race) %>%
+  summarise(n=n()) %>%
+  mutate(n/sum(n))
+"
+"1","# A tibble: 8 x 3
+"
+"1","  race                n `n/sum(n)`
+"
+"1","  <fct>           <int>      <dbl>
+"
+"1","1 White           46289    0.717  
+"
+"1","2 Black            7926    0.123  
+"
+"1","3 Hispanic         5238    0.0811 
+"
+"1","4 Asian            2278    0.0353 
+"
+"1","5 Native American   522    0.00808
+"
+"1","6 Mixed            1452    0.0225 
+"
+"1","7 Other             760    0.0118 
+"
+"1","8 Middle Eastern    135    0.00209
+"

@@ -1,0 +1,8 @@
+"0","df$religpew <- as_factor(df$religpew)"
+"0","df$none <- fct_collapse(df$religpew, "
+"0","none = c(""none"", ""Nothing in particular""),"
+"0","atheist_agnostic = c(""Atheist"", ""Agnostic""),"
+"0","religous = c(""Protestant"", ""Roman Catholic"", ""Mormon"", ""Eastern or Greek Orthodox"", ""Jewish"", ""Muslim"", ""Buddhist"", ""Hindu"", ""Something else"", ""Skipped"", ""Not Asked""))"
+"0","df$none2 <- fct_collapse(df$religpew, "
+"0","                          none = c(""Atheist"", ""Agnostic"", ""none"", ""Nothing in particular""),"
+"0","                          religous = c(""Protestant"", ""Roman Catholic"", ""Mormon"", ""Eastern or Greek Orthodox"", ""Jewish"", ""Muslim"", ""Buddhist"", ""Hindu"", ""Something else"", ""Skipped"", ""Not Asked""))"

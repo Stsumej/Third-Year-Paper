@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "---\ntitle: \"R Notebook\"\noutput: html_notebook\n---\n\nThis is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. \n\nTry executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. \n\n```{r}\nrm(list=ls())\nknitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)\n\n\nlibrary(forcats)\nlibrary(bookdown)\nlibrary(knitr)\nlibrary(readstata13)\nlibrary(tidyverse)\nlibrary(readxl)\nlibrary(lmtest)\nlibrary(plm)\nlibrary(stargazer)\nlibrary(pROC)\nlibrary(dplyr)\nlibrary(gridExtra)\nlibrary(texreg)\nlibrary(ggplot2)\n\ngov <- read.dta13(\"June 2021 YouGov.dta\")\n\n```\n\n\n```{r}\ngov$us1 <- as.numeric(gov$UMD70)\ngov$us2 <- as.numeric(gov$UMD71)\ngov$us3 <- as.numeric(gov$UMD72)\ngov$us4 <- as.numeric(gov$UMD73)\n\n\ngov$usid <- (rev(gov$us1) + rev(gov$us2) + rev(gov$us3) + rev(gov$us4))/4\n\ngov$usid <- as.numeric(gov$usid)\n\nhist(gov$usid)\n```\n\n",
+    "created" : 1628815748395.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "4184666343",
+    "id" : "B5DCE524",
+    "lastKnownWriteTime" : 1628816799,
+    "last_content_update" : 1628816799676,
+    "path" : "~/Documents/Working Directory/Third-Year-Paper/Third Year Paper Replication.Rmd",
+    "project_path" : "Third Year Paper Replication.Rmd",
+    "properties" : {
+        "chunk_output_type" : "inline",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

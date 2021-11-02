@@ -1,0 +1,2 @@
+"0","sdcoefnames <- c(""Intercept"", ""Citizen"", ""Female"", ""Native Born"",""South"", ""Income"", ""Moderate LF"", ""High LF"",""Partisanship"", ""Education"", ""Age"")"
+"0","#plotreg(sdblack, use.se = FALSE, omit.coef = ""Intercept"", custom.coef.names = sdcoefnames) + labs(title =""Degree of Black Collectivism and American National Identity"") + theme_classic()"

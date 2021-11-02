@@ -1,0 +1,3 @@
+"0","w.sdcoefnames <- c(""Intercept"", ""Citizen"", ""Female"", ""South"", "
+"0","                 ""Income"", ""Moderate LF"",""High LF"",""Partisanship"", ""Education"", ""Age"")"
+"0","#plotreg(sdWhite, use.se = FALSE, omit.coef = ""Intercept"", custom.coef.names = w.sdcoefnames) + labs(title = ""Degree of White Collectivism and American National Identity"") + theme_classic()"

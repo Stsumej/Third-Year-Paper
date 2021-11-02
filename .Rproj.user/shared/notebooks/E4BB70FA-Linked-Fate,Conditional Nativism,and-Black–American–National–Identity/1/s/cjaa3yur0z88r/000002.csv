@@ -1,0 +1,7 @@
+"0","wmps <- cmps %>% "
+"0","  filter(allrace == ""White Non Hispanic"")"
+"0","wmps$gparents <- fct_rev(wmps$c377)"
+"0","wmps$gparents <- fct_recode(wmps$gparents, "
+"0","                             NULL = ""Don<92>t know"","
+"0","                            NULL = ""Both parents born in Puerto Rico"")"
+"0","plot(wmps$gparents)"

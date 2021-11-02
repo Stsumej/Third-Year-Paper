@@ -1,0 +1,5 @@
+"0","cmps$gg.dlf <- cmps$c151"
+"0","p <- ggplot(cmps, aes(allrace, fill = gg.dlf)) "
+"0","p <- p + geom_bar(position = ""fill"") + theme_classic()"
+"0","p <- p + labs(title = ""Degree of Linked Fate Across Racial Groups"", x = ""Race"", y = ""Proportion"") + theme(plot.title = element_text(hjust = 0.5), plot.caption = element_text(hjust = 0))"
+"0","p <- p + scale_fill_grey(start = 0.2, end = 0.8, na.value = ""1"", name = ""Degree of Linked Fate"",labels = c(""High"", ""Moderate"", ""Low"", ""None""));p"

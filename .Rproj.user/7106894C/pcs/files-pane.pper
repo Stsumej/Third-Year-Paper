@@ -1,9 +1,13 @@
 {
-    "path" : "~/Documents/Working Directory/Third-Year-Paper",
-    "sortOrder" : [
+    "path": "~/Documents/Working Directory/Third-Year-Paper",
+    "sortOrder": [
         {
-            "ascending" : true,
-            "columnIndex" : 2
+            "columnIndex": 4,
+            "ascending": false
+        },
+        {
+            "columnIndex": 2,
+            "ascending": true
         }
     ]
 }
